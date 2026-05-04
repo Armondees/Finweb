@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contas a Pagar e Receber - FinWeb</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #0f172a;
+      --card-soft: #111c31;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #22c55e;
+      --green-dark: #16a34a;
+      --cyan: #06b6d4;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --purple: #8b5cf6;
+      --shadow: 0 18px 45px rgba(0,0,0,0.22);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    html, body { height: 100dvh; overflow: hidden; }
+
+    body {
+      display: flex;
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,0.08), transparent 32%),
+        radial-gradient(circle at top right, rgba(6,182,212,0.05), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+    }
+
+    .sidebar {
+      width: 220px;
+      height: 100dvh;
+      max-height: 100dvh;
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.92);
+      border-right: 1px solid var(--border);
+      padding: 20px 14px max(34px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(12px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-gutter: stable;
+      transition: width .2s ease, padding .2s ease;
+    }
+
+    .sidebar.collapsed {
+      width: 72px;
+      padding: 20px 10px max(34px, env(safe-area-inset-bottom));
+    }
+
+    .sidebar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 28px;
+      flex: 0 0 auto;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      padding: 0 8px;
+      letter-spacing: -0.04em;
+      flex: 0 0 auto;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .logo span { color: var(--green); }
+
+    .sidebar-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: rgba(2,6,23,.55);
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      transition: all .18s ease;
+    }
+    .sidebar-toggle:hover { color: var(--green); border-color: rgba(34,197,94,.42); background: rgba(34,197,94,.08); }
+
+    .menu { flex: 1 1 auto; padding-bottom: 12px; }
+    .menu a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; margin-bottom: 4px; border-radius: 10px;
+      text-decoration: none; color: var(--muted); font-size: 14px;
+      transition: all 0.18s ease; cursor: pointer; white-space: nowrap;
+    }
+    .menu a .menu-text { overflow: hidden; text-overflow: ellipsis; }
+    .sidebar.collapsed .logo { width: 0; padding: 0; }
+    .sidebar.collapsed .menu-label,
+    .sidebar.collapsed .menu a .menu-text { display: none; }
+    .sidebar.collapsed .menu a { justify-content: center; padding: 10px; gap: 0; }
+    .sidebar.collapsed .menu-divider { margin: 10px 8px; }
+    .menu a:hover, .menu a.active { background: rgba(34,197,94,0.12); color: var(--green); }
+    .menu a.danger:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+    .menu-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 12px 12px 6px; font-weight: 700; opacity: 0.7; display: block; }
+    .menu-divider { border: 0; border-top: 1px solid var(--border); margin: 10px 12px; opacity: 0.5; }
+
+    .main.payables-page {
+      flex: 1;
+      height: 100dvh;
+      padding: 18px 24px max(24px, env(safe-area-inset-bottom));
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+
+    .page-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 12px; flex: 0 0 auto; }
+    .page-title h2 { font-size: 21px; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 4px; }
+    .page-title p { font-size: 12px; color: var(--muted); }
+
+    .btn {
+      padding: 10px 18px; border-radius: 10px; border: 1px solid transparent;
+      cursor: pointer; font-weight: 600; transition: all 0.2s ease;
+      color: var(--text); background: #334155; white-space: nowrap; font-size: 14px;
+    }
+    .btn:hover { transform: translateY(-1px); opacity: 0.95; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--green), var(--green-dark)); color: white; box-shadow: 0 10px 24px rgba(34,197,94,0.22); }
+    .btn-secondary, .btn-ghost { background: rgba(15, 23, 42, 0.9); border-color: var(--border); color: var(--text); }
+    .btn-danger { background: rgba(239,68,68,0.12); color: var(--danger); border-color: rgba(239,68,68,0.22); }
+    .btn.full { width: 100%; }
+
+    .card { background: linear-gradient(145deg, rgba(15,23,42,0.98), rgba(10,17,32,0.98)); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+
+    .payables-layout { flex: 1; min-height: 0; display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+    .payables-side { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+    .side-card { padding: 14px 16px; border-radius: 15px; }
+    .side-card-title { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(148,163,184,.12); }
+    .side-card-title span { font-size: 13px; font-weight: 700; color: var(--text); }
+    .side-card-title small { font-size: 10.5px; color: var(--muted); line-height: 1.35; }
+
+    .summary-line { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 7px 0; border-bottom: 1px solid rgba(148,163,184,.08); font-size: 12px; color: var(--muted); }
+    .summary-line:last-child { border-bottom: none; }
+    .summary-line strong { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .summary-line.pay strong { color: var(--danger); }
+    .summary-line.receive strong { color: var(--green); }
+    .summary-line.overdue strong { color: var(--warning); }
+    .summary-line.forecast strong { color: var(--cyan); font-size: 14px; }
+
+    .filter-field { margin-bottom: 9px; }
+    .filter-field label, .modal label {
+      font-size: 9.5px; color: #8aa0bd; text-transform: uppercase;
+      letter-spacing: .045em; font-weight: 700; margin-bottom: 5px; display: block;
+    }
+    input, select, textarea {
+      width: 100%; height: 34px; padding: 7px 9px;
+      background: rgba(2,6,23,0.88); border: 1px solid var(--border);
+      color: white; border-radius: 8px; font-size: 12px; outline: none; transition: all 0.2s ease;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,0.13); }
+    input::placeholder, textarea::placeholder { color: #64748b; }
+
+    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .quick-actions .btn { height: 34px; padding: 7px 10px; font-size: 11.5px; border-radius: 8px; }
+
+    .period-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .month-closed-card { text-align: center; }
+    .month-closed-card .side-card-title { align-items: center; text-align: center; }
+    .month-closed-card .filter-field { text-align: left; }
+    .mode-select-wrap { margin-top: 10px; }
+
+    .advanced-filters {
+      display: none;
+      flex: 0 0 auto;
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15,23,42,.62);
+    }
+    .advanced-filters.open { display: block; }
+    .advanced-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .advanced-title strong { font-size: 11.5px; color: var(--text); }
+    .advanced-title span { font-size: 10.5px; color: var(--muted); }
+    .advanced-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+    .advanced-grid input,
+    .advanced-grid select {
+      height: 32px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      font-size: 11.5px;
+    }
+    .advanced-filters label {
+      font-size: 9.5px;
+      color: #8aa0bd;
+      text-transform: uppercase;
+      letter-spacing: .045em;
+      font-weight: 700;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .description-filter { grid-column: span 2; }
+
+    .grid-actions { display: flex; gap: 8px; align-items: center; }
+    .grid-actions .btn,
+    .quick-actions .btn,
+    .quick-help .btn {
+      padding: 8px 12px;
+      border-radius: 9px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+    .quick-help { flex: 0 0 auto; min-height: 0; display: flex; flex-direction: column; }
+    .quick-help .btn.full { height: 34px; margin-top: 7px; padding: 8px 10px; }
+    .muted-btn { opacity: .82; }
+    .payables-side { padding-bottom: max(18px, env(safe-area-inset-bottom)); overflow-y: auto; scrollbar-gutter: stable; }
+    .actions-card { flex: 0 0 auto; margin-bottom: max(8px, env(safe-area-inset-bottom)); }
+    .filter-actions { display: grid; grid-template-columns: 1fr; gap: 7px; margin-top: auto; padding-top: 8px; }
+    .quick-help .side-card-title { margin-bottom: 8px; }
+    .recurrence-options { display: none; }
+    .recurrence-options.open { display: block; }
+    .date-field input[type="date"] { cursor: pointer; }
+
+    .select-cell,
+    .select-header { display: flex; align-items: center; justify-content: center; }
+    .row-check,
+    #selectAllRows {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--green);
+      cursor: pointer;
+    }
+    .selected-total {
+      color: var(--green);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+
+    .grid-card { min-width: 0; min-height: 0; height: 100%; display: flex; flex-direction: column; overflow: visible; border-radius: 15px; }
+    .grid-topbar { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 11px 14px; border-bottom: 1px solid var(--border); background: rgba(2,6,23,.25); }
+    .grid-topbar strong { font-size: 12.5px; color: var(--text); }
+    .grid-topbar small { display: block; margin-top: 3px; font-size: 10.5px; color: var(--muted); }
+
+    .list-header, .commitment-row {
+      display: grid;
+      grid-template-columns: 34px 104px minmax(260px, 1fr) 130px 128px 112px 74px;
+      gap: 14px;
+      align-items: center;
+    }
+    .list-header { flex: 0 0 auto; padding: 10px 14px; border-bottom: 1px solid rgba(30,41,59,0.9); background: rgba(255,255,255,0.025); color: #a9c0df; font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+    .grid-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: auto; scrollbar-gutter: stable; }
+    .commitment-row { padding: 12px 14px; border-bottom: 1px solid rgba(30,41,59,0.9); transition: background .18s ease; min-width: 900px; }
+    .commitment-row:nth-child(even) { background: rgba(255,255,255,0.012); }
+    .commitment-row:hover { background: rgba(34,197,94,0.04); }
+    .due-date { font-size: 11px; color: rgba(226,232,240,.82); font-weight: 600; white-space: nowrap; }
+    .due-date.overdue { color: var(--warning); }
+    .commitment-main { min-width: 0; }
+    .commitment-title { font-size: 12.5px; font-weight: 650; color: #e5edf8; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .commitment-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 4px; font-size: 10px; color: rgba(148,163,184,.78); line-height: 1.25; }
+    .commitment-meta span { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .commitment-meta span + span::before { content: '•'; margin-right: 5px; color: rgba(148,163,184,.45); }
+    .money { text-align: right; font-size: 12.5px; font-weight: 750; white-space: nowrap; }
+    .money.income { color: var(--green); }
+    .money.expense { color: var(--danger); }
+
+    .badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
+    .badge-planned { background: rgba(6,182,212,0.13); color: var(--cyan); }
+    .badge-overdue { background: rgba(245,158,11,0.14); color: var(--warning); }
+    .badge-realized { background: rgba(34,197,94,0.13); color: var(--green); }
+    .badge-cancelled { background: rgba(148,163,184,0.14); color: #cbd5e1; }
+    .badge-expense { background: rgba(239,68,68,0.12); color: var(--danger); }
+    .badge-income { background: rgba(34,197,94,0.12); color: var(--green); }
+
+    .row-actions { text-align: right; position: relative; }
+    .action-menu-btn { width: 34px; height: 30px; border-radius: 9px; border: 1px solid rgba(148,163,184,0.13); background: rgba(15,23,42,0.72); color: rgba(226,232,240,0.82); cursor: pointer; font-size: 16px; line-height: 1; font-weight: 700; transition: all .18s ease; }
+    .action-menu-btn:hover { color: white; border-color: rgba(34,197,94,0.48); background: rgba(34,197,94,0.08); }
+    .global-action-menu { display: none; position: fixed; min-width: 170px; padding: 6px; border: 1px solid var(--border); border-radius: 12px; background: #0b1220; box-shadow: 0 18px 45px rgba(0,0,0,.42); z-index: 9999; }
+    .global-action-menu.open { display: block; }
+    .global-action-menu button { width: 100%; border: 0; background: transparent; color: var(--text); padding: 9px 10px; border-radius: 9px; text-align: left; cursor: pointer; font-size: 13px; }
+    .global-action-menu button:hover { background: rgba(34,197,94,0.10); }
+    .global-action-menu button.danger { color: var(--danger); }
+    .global-action-menu button.danger:hover { background: rgba(239,68,68,0.10); }
+
+    .list-footer { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px max(14px, env(safe-area-inset-bottom)); min-height: 42px; border-top: 1px solid var(--border); background: rgba(15,23,42,0.96); color: var(--muted); font-size: 11.5px; }
+    .empty { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 13px; }
+    .empty .icon { font-size: 36px; margin-bottom: 12px; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--card); padding: 28px; border-radius: 16px; width: 100%; max-width: 560px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: visible; }
+    .modal h3 { margin-bottom: 20px; font-size: 18px; font-weight: 700; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group input, .form-group select { height: 38px; padding: 9px 11px; font-size: 13px; border-radius: 10px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+    .toast { position: fixed; bottom: max(24px, env(safe-area-inset-bottom)); right: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; font-size: 13px; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--green); color: var(--green); }
+    .toast.error { border-color: var(--danger); color: var(--danger); }
+
+
+
+    /* Ajustes solicitados: três cards laterais e modais no padrão da tela de transações */
+    .payables-side {
+      overflow: hidden;
+      padding-bottom: 0;
+    }
+    .payables-side > .side-card {
+      flex: 0 0 auto;
+    }
+    .payables-side .quick-help {
+      flex: 1 1 auto;
+      min-height: 128px;
+      justify-content: space-between;
+    }
+    .filter-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 7px;
+      margin-top: 10px;
+    }
+    .commitment-modal {
+      max-width: 500px;
+      padding: 28px;
+      border-radius: 16px;
+      overflow: visible;
+    }
+    .settlement-modal {
+      max-width: 420px;
+    }
+    .scope-row {
+      display: none;
+    }
+    .scope-row.open {
+      display: grid;
+    }
+    .recurrence-options {
+      display: none;
+    }
+    .recurrence-options.open {
+      display: grid;
+    }
+    .date-field input[type="date"] {
+      cursor: pointer;
+    }
+    .installment-preview {
+      margin-top: -6px;
+      margin-bottom: 14px;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .installment-preview strong {
+      color: var(--green);
+    }
+
+    .selected-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      min-height: 0;
+    }
+    .selected-tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(34,197,94,0.10);
+      border: 1px solid rgba(34,197,94,0.18);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .selected-tag-pill button {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      padding: 0;
+    }
+    .batch-edit-modal { max-width: 520px; }
+    .batch-edit-hint { margin-bottom: 14px; font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+    .batch-edit-hint strong { color: var(--green); }
+
+
+
+    /* Ajustes de navegação mensal, modal com detalhes expansíveis e baixa em lote */
+    .month-nav {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .month-nav-btn {
+      width: 28px; height: 28px; border-radius: 9px; border: 1px solid rgba(148,163,184,.16);
+      background: rgba(2,6,23,.55); color: var(--muted); cursor: pointer; font-weight: 800;
+      display: grid; place-items: center; transition: all .18s ease;
+    }
+    .month-nav-btn:hover { color: var(--green); border-color: rgba(34,197,94,.42); background: rgba(34,197,94,.08); }
+    .month-nav-label { font-size: 12px; color: var(--text); font-weight: 700; min-width: 120px; text-align: center; }
+
+    .commitment-modal { max-width: 520px; transition: max-width .2s ease; }
+    .commitment-modal.details-open { max-width: 920px; }
+    .commitment-modal-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
+    .commitment-modal.details-open .commitment-modal-layout { grid-template-columns: minmax(0, 1fr) 330px; }
+    .commitment-details-panel { display: none; padding-left: 18px; border-left: 1px solid rgba(148,163,184,.14); }
+    .commitment-modal.details-open .commitment-details-panel { display: block; }
+    .details-toggle-row { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-top: 2px; margin-bottom: 14px; }
+    .details-toggle-row small { color: var(--muted); font-size: 11.5px; line-height: 1.35; }
+    .details-panel-title { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(148,163,184,.12); }
+    .details-panel-title strong { display: block; font-size: 13px; color: var(--text); }
+    .details-panel-title span { display: block; margin-top: 3px; font-size: 11px; color: var(--muted); line-height: 1.35; }
+    .batch-settle-btn { display: inline-flex; align-items: center; gap: 6px; }
+    @media (max-width: 900px) {
+      .commitment-modal.details-open { max-width: 560px; }
+      .commitment-modal.details-open .commitment-modal-layout { grid-template-columns: 1fr; }
+      .commitment-details-panel { padding-left: 0; border-left: 0; padding-top: 14px; border-top: 1px solid rgba(148,163,184,.14); }
+    }
+
+    @media (max-width: 1180px) {
+      body { overflow: auto; }
+      html, body { height: auto; }
+      .main.payables-page { height: auto; min-height: 100dvh; overflow: visible; }
+      .payables-layout { grid-template-columns: 1fr; }
+      .payables-side { height: auto; }
+      .grid-card { min-height: 620px; }
+    }
+    @media (max-width: 768px) {
+      body { display: block; }
+      .sidebar { display: none; }
+      .main.payables-page { padding: 18px 14px; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .list-header, .commitment-row { grid-template-columns: 34px 96px minmax(240px,1fr) 110px 110px 100px 60px; min-width: 820px; }
+      .advanced-grid { grid-template-columns: 1fr; }
+      .description-filter { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="logo">Fin<span>Web</span></div>
+    <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" title="Recolher/expandir menu">☰</button>
+  </div>
+
+  <nav class="menu">
+    <div class="menu-label">Movimentações</div>
+    <a href="/public/dashboard.html" title="Dashboard">📊 <span class="menu-text">Dashboard</span></a>
+    <a href="/public/transactions.html" title="Transações">💸 <span class="menu-text">Transações</span></a>
+    <a href="/public/payables_receivables.html" class="active" title="Pagar/Receber">📅 <span class="menu-text">Pagar/Receber</span></a>
+    <a href="/public/cards.html" title="Cartões">💳 <span class="menu-text">Cartões</span></a>
+
+    <hr class="menu-divider">
+
+    <div class="menu-label">Demonstrativos</div>
+    <a href="/public/reports.html" title="Relatórios">📈 <span class="menu-text">Relatórios</span></a>
+    <a href="#" title="Fluxo de Caixa">🌊 <span class="menu-text">Fluxo de Caixa</span></a>
+
+    <hr class="menu-divider">
+
+    <div class="menu-label">Cadastro</div>
+    <a href="/public/accounts.html" title="Contas">🏦 <span class="menu-text">Contas</span></a>
+    <a href="/public/categories.html" title="Categorias">🏷️ <span class="menu-text">Categorias</span></a>
+    <a href="/public/cost_centers.html" title="Centro de Custos">🏢 <span class="menu-text">Centro de Custos</span></a>
+    <a href="/public/Tags.html" title="Tags">🏷️ <span class="menu-text">Tags</span></a>
+
+    <hr class="menu-divider">
+    <a onclick="logout()" class="danger" style="cursor:pointer" title="Sair">🚪 <span class="menu-text">Sair</span></a>
+  </nav>
+</div>
+
+<div class="main payables-page">
+  <div class="page-header">
+    <div class="page-title">
+      <h2>📅 Contas a Pagar e Receber</h2>
+      <p>Controle compromissos previstos, vencidos e baixados com impacto no saldo futuro.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal()">+ Novo Compromisso</button>
+  </div>
+
+  <div class="payables-layout">
+    <aside class="payables-side">
+      <section class="card side-card month-closed-card">
+        <div class="side-card-title">
+          <span>Mês fechado</span>
+          <small>Filtro inicial da tela</small>
+        </div>
+
+        <div class="month-nav" aria-label="Navegação de mês fechado">
+          <button type="button" class="month-nav-btn" onclick="changeClosedMonth(-1)" title="Mês anterior">&lt;</button>
+          <div class="month-nav-label" id="closedMonthLabel">Mês atual</div>
+          <button type="button" class="month-nav-btn" onclick="changeClosedMonth(1)" title="Próximo mês">&gt;</button>
+        </div>
+
+        <div class="period-row">
+          <div class="filter-field">
+            <label>Mês</label>
+            <select id="filterMonth" onchange="updateClosedMonthLabel(); applyFilters()"></select>
+          </div>
+          <div class="filter-field">
+            <label>Ano</label>
+            <select id="filterYear" onchange="updateClosedMonthLabel(); applyFilters()"></select>
+          </div>
+        </div>
+
+        <div class="filter-field mode-select-wrap">
+          <label>Visualizar</label>
+          <select id="filterType" onchange="applyFilters()">
+            <option value="expense" selected>Contas a pagar</option>
+            <option value="income">Contas a receber</option>
+            <option value="">Pagar e receber</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card side-card">
+        <div class="side-card-title">
+          <span>Resumo do período</span>
+          <small>Baseado no filtro atual</small>
+        </div>
+        <div class="summary-line pay"><span>A pagar</span><strong id="summaryPay">R$ 0,00</strong></div>
+        <div class="summary-line receive"><span>A receber</span><strong id="summaryReceive">R$ 0,00</strong></div>
+        <div class="summary-line overdue"><span>Vencidos</span><strong id="summaryOverdue">R$ 0,00</strong></div>
+        <div class="summary-line forecast"><span>Saldo previsto</span><strong id="summaryForecast">R$ 0,00</strong></div>
+      </section>
+
+    </aside>
+
+    <section class="card grid-card">
+      <div class="grid-topbar">
+        <div>
+          <strong>Compromissos financeiros</strong>
+          <small id="activeFiltersLabel">Previstos, vencidos, baixados e cancelados</small>
+        </div>
+        <div class="grid-actions">
+          <button type="button" class="btn btn-secondary" onclick="toggleAdvancedFilters()">Filtrar</button>
+          <button type="button" class="btn btn-secondary" onclick="clearFilters()">Limpar</button>
+          <button type="button" class="btn btn-secondary batch-settle-btn" onclick="openBatchEditDetails()">Alterar selecionados</button>
+          <button type="button" class="btn btn-secondary batch-settle-btn" onclick="openBatchSettlement()">Baixar selecionados</button>
+        </div>
+      </div>
+
+      <section class="advanced-filters" id="advancedFilters" aria-label="Filtros dinâmicos opcionais">
+        <div class="advanced-title">
+          <strong>Filtros dinâmicos</strong>
+          <span>Não fazem parte do filtro padrão de abertura</span>
+        </div>
+        <div class="advanced-grid">
+          <div>
+            <label>Status</label>
+            <select id="filterStatus" onchange="applyFilters()">
+              <option value="">Pendentes (padrão)</option>
+              <option value="all">Todos</option>
+              <option value="planned">Previsto</option>
+              <option value="overdue">Vencido</option>
+              <option value="realized">Baixado</option>
+              <option value="cancelled">Cancelado</option>
+            </select>
+          </div>
+          <div>
+            <label>Conta prevista</label>
+            <select id="filterAccount" onchange="applyFilters()">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div>
+            <label>Data inicial</label>
+            <input id="filterFrom" type="date" onclick="this.showPicker && this.showPicker()" onchange="applyFilters()">
+          </div>
+          <div>
+            <label>Data final</label>
+            <input id="filterTo" type="date" onclick="this.showPicker && this.showPicker()" onchange="applyFilters()">
+          </div>
+          <div class="description-filter">
+            <label>Descrição</label>
+            <input id="filterSearch" type="text" placeholder="Buscar descrição..." oninput="applyFilters()">
+          </div>
+        </div>
+      </section>
+
+      <div class="list-header">
+        <div class="select-header"><input id="selectAllRows" type="checkbox" title="Selecionar todos" onchange="toggleSelectAllRows()"></div>
+        <div>Vencimento</div>
+        <div>Descrição</div>
+        <div>Valor</div>
+        <div>Conta</div>
+        <div>Status</div>
+        <div style="text-align:right">Ação</div>
+      </div>
+
+      <div class="grid-scroll" id="listBody">
+        <div class="empty"><div class="icon">⏳</div>Carregando...</div>
+      </div>
+
+      <div class="list-footer">
+        <span id="tableCount">Mostrando 0 compromissos</span>
+        <span class="selected-total" id="selectedTotal">Selecionados: R$ 0,00</span>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal commitment-modal" id="commitmentModalBox">
+    <h3 id="modalTitle">Novo Compromisso</h3>
+
+    <div class="commitment-modal-layout">
+      <div class="commitment-main-fields">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select id="fType" onchange="updateCategoriesByType()">
+              <option value="expense">A pagar</option>
+              <option value="income">A receber</option>
+            </select>
+          </div>
+          <div class="form-group date-field">
+            <label>Data de vencimento *</label>
+            <input id="fDueDate" type="date" onclick="this.showPicker && this.showPicker()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Descrição *</label>
+          <input id="fDescription" type="text" placeholder="Ex.: Aluguel, salário, mensalidade...">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Valor *</label>
+            <input id="fAmount" type="number" step="0.01" min="0" placeholder="0,00" oninput="updateInstallmentPreview()">
+          </div>
+          <div class="form-group">
+            <label>Forma de lançamento</label>
+            <select id="fRecurrenceMode" onchange="handleRecurrenceModeChange()">
+              <option value="single">Único</option>
+              <option value="recurring">Recorrente</option>
+              <option value="installment">Parcelado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row recurrence-options" id="recurrenceOptions">
+          <div class="form-group">
+            <label>Periodicidade</label>
+            <select id="fRecurrenceFrequency" onchange="updateInstallmentPreview()">
+              <option value="monthly" selected>Mensal</option>
+              <option value="weekly">Semanal</option>
+              <option value="biweekly">Quinzenal</option>
+              <option value="yearly">Anual</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantidade de parcelas/recorrências</label>
+            <input id="fInstallments" type="number" min="2" step="1" placeholder="Ex.: 3" oninput="updateInstallmentPreview()">
+          </div>
+        </div>
+        <div class="installment-preview" id="installmentPreview"></div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Conta prevista *</label>
+            <select id="fAccount"></select>
+          </div>
+          <div class="form-group date-field">
+            <label>Data de inclusão *</label>
+            <input id="fInclusionDate" type="date" onclick="this.showPicker && this.showPicker()">
+          </div>
+        </div>
+
+        <div class="details-toggle-row">
+          <small>Use detalhes para categoria, centro de custo e baixa.</small>
+          <button type="button" class="btn btn-secondary" onclick="toggleCommitmentDetails()" id="btnDetails">Detalhes</button>
+        </div>
+      </div>
+
+      <aside class="commitment-details-panel" id="commitmentDetailsPanel">
+        <div class="details-panel-title">
+          <strong>Detalhes do compromisso</strong>
+          <span>Campos complementares para classificação, relatórios e baixa.</span>
+        </div>
+
+        <div class="form-group">
+          <label>Status *</label>
+          <select id="fStatus">
+            <option value="planned">Previsto</option>
+            <option value="realized">Baixado</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="fCategory"><option value="">Sem categoria</option></select>
+        </div>
+
+        <div class="form-group">
+          <label>Centro de custo</label>
+          <select id="fCostCenter"><option value="">Sem centro de custo</option></select>
+        </div>
+
+        <div class="form-group">
+          <label>Tags</label>
+          <select id="fTagPicker" onchange="addSelectedTagFromPicker()">
+            <option value="">Adicionar tag...</option>
+          </select>
+          <div id="selectedTags" class="selected-tags"></div>
+        </div>
+
+        <div class="form-group date-field">
+          <label>Data da baixa</label>
+          <input id="fPaymentDate" type="date" onclick="this.showPicker && this.showPicker()">
+        </div>
+
+        <div class="form-row scope-row" id="editScopeRow">
+          <div class="form-group">
+            <label>Aplicar alteração/exclusão</label>
+            <select id="fEditScope">
+              <option value="single">Somente esta parcela</option>
+              <option value="pending_group">Todas as parcelas pendentes do grupo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Integridade</label>
+            <input type="text" value="Baixadas/canceladas não serão alteradas" disabled>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btnSave" onclick="saveCommitment()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settlementModalOverlay">
+  <div class="modal settlement-modal">
+    <h3 id="settlementTitle">Baixar compromisso</h3>
+    <input id="settlementId" type="hidden">
+    <input id="settlementIds" type="hidden">
+    <input id="settlementMode" type="hidden" value="single">
+    <div class="installment-preview" id="settlementHint"></div>
+
+    <div class="form-group date-field">
+      <label>Data da baixa *</label>
+      <input id="settlementDate" type="date" onclick="this.showPicker && this.showPicker()">
+    </div>
+
+    <div class="form-group">
+      <label>Conta para baixa *</label>
+      <select id="settlementAccount"></select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeSettlementModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btnSettle" onclick="confirmSettlement()">Confirmar baixa</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="batchEditModalOverlay">
+  <div class="modal batch-edit-modal">
+    <h3>Alterar detalhes em lote</h3>
+    <div class="batch-edit-hint" id="batchEditHint">
+      Serão alterados somente os títulos <strong>pendentes</strong> selecionados. Títulos baixados ou cancelados serão ignorados.
+    </div>
+
+    <div class="form-row">
+      <div class="form-group date-field">
+        <label>Nova data de vencimento</label>
+        <input id="batchDueDate" type="date" onclick="this.showPicker && this.showPicker()">
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="batchCategory"><option value="">Manter categoria atual</option></select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Centro de custo</label>
+      <select id="batchCostCenter"><option value="">Manter centro atual</option></select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeBatchEditModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btnBatchEdit" onclick="confirmBatchEditDetails()">Aplicar alterações</button>
+    </div>
+  </div>
+</div>
+
+<div class="global-action-menu" id="globalActionMenu"></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initSupabase, getCurrentUser, db } from '../src/js/utils/db.js';
+  import { logoutUser } from '../src/js/modules/auth.js';
+  import { format } from '../src/js/utils/format.js';
+
+  let user = null;
+  let commitments = [];
+  let accounts = [];
+  let categories = [];
+  let costCenters = [];
+  let tagsList = [];
+  let transactionTagsMap = {};
+  let selectedTagIds = [];
+  let editingId = null;
+  let selectedCommitmentIds = new Set();
+  let editingGroupId = null;
+
+  window.toggleSidebar = () => {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed');
+    localStorage.setItem('finweb_sidebar_collapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
+  };
+
+  function restoreSidebarState() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const collapsed = localStorage.getItem('finweb_sidebar_collapsed') === 'true';
+    sidebar.classList.toggle('collapsed', collapsed);
+  }
+
+  const todayStr = () => new Date().toISOString().substring(0, 10);
+
+  function addMonths(dateStr, monthsToAdd) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const base = new Date(y, m - 1 + monthsToAdd, 1);
+    const lastDay = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+    const day = Math.min(d, lastDay);
+    base.setDate(day);
+    return `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, '0')}-${String(base.getDate()).padStart(2, '0')}`;
+  }
+
+  function addDays(dateStr, daysToAdd) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const base = new Date(y, m - 1, d);
+    base.setDate(base.getDate() + daysToAdd);
+    return `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, '0')}-${String(base.getDate()).padStart(2, '0')}`;
+  }
+
+  function addYears(dateStr, yearsToAdd) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const base = new Date(y + yearsToAdd, m - 1, 1);
+    const lastDay = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+    base.setDate(Math.min(d, lastDay));
+    return `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, '0')}-${String(base.getDate()).padStart(2, '0')}`;
+  }
+
+  function addByFrequency(dateStr, index, frequency = 'monthly') {
+    if (frequency === 'weekly') return addDays(dateStr, index * 7);
+    if (frequency === 'biweekly') return addDays(dateStr, index * 14);
+    if (frequency === 'yearly') return addYears(dateStr, index);
+    return addMonths(dateStr, index);
+  }
+
+  function generateGroupId() {
+    return crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function isPendingCommitment(item) {
+    return item && !['realized', 'cancelled'].includes(item.status);
+  }
+
+  function optionalSafePayload(payload) {
+    const clean = { ...payload };
+    delete clean.criado_em;
+    delete clean.created_at;
+    delete clean.installment_group_id;
+    delete clean.installment_number;
+    delete clean.installment_total;
+    delete clean.is_recurring;
+    delete clean.recurring_frequency;
+    delete clean.notes;
+    return clean;
+  }
+
+  async function insertTransactionSafe(payload) {
+    try {
+      return await db.insert('transactions', payload);
+    } catch (err) {
+      const msg = String(err?.message || '').toLowerCase();
+      if (msg.includes('column') || msg.includes('schema cache') || msg.includes('recurring_frequency')) {
+        return await db.insert('transactions', optionalSafePayload(payload));
+      }
+      throw err;
+    }
+  }
+
+  async function updateTransactionSafe(id, payload) {
+    try {
+      return await db.update('transactions', payload, id);
+    } catch (err) {
+      const msg = String(err?.message || '').toLowerCase();
+      if (msg.includes('column') || msg.includes('schema cache') || msg.includes('recurring_frequency')) {
+        return await db.update('transactions', optionalSafePayload(payload), id);
+      }
+      throw err;
+    }
+  }
+
+  window.handleRecurrenceModeChange = () => {
+    const mode = document.getElementById('fRecurrenceMode')?.value || 'single';
+    const options = document.getElementById('recurrenceOptions');
+    const installments = document.getElementById('fInstallments');
+    const frequency = document.getElementById('fRecurrenceFrequency');
+    if (!options || !installments || !frequency) return;
+
+    const show = mode === 'recurring' || mode === 'installment';
+    options.classList.toggle('open', show);
+    installments.disabled = !show;
+    frequency.disabled = !show;
+    installments.placeholder = mode === 'recurring' ? 'Ex.: 12 recorrências' : 'Ex.: 3 parcelas';
+    if (!show) installments.value = '';
+    if (show && !frequency.value) frequency.value = 'monthly';
+    updateInstallmentPreview();
+  };
+
+  window.updateInstallmentPreview = () => {
+    const preview = document.getElementById('installmentPreview');
+    if (!preview) return;
+    const mode = document.getElementById('fRecurrenceMode')?.value || 'single';
+    const amount = parseFloat(document.getElementById('fAmount')?.value || '0') || 0;
+    const qty = parseInt(document.getElementById('fInstallments')?.value || '0', 10);
+    const freq = document.getElementById('fRecurrenceFrequency')?.value || 'monthly';
+    const freqLabel = { weekly: 'semanal', biweekly: 'quinzenal', monthly: 'mensal', yearly: 'anual' }[freq] || 'mensal';
+
+    if (mode === 'single') {
+      preview.innerHTML = '';
+      return;
+    }
+
+    if (!qty || qty < 2 || !amount) {
+      preview.innerHTML = mode === 'installment'
+        ? 'Informe o valor total e a quantidade de parcelas para calcular o valor de cada parcela.'
+        : `Informe a quantidade de recorrências para gerar lançamentos com periodicidade ${freqLabel}.`;
+      return;
+    }
+
+    if (mode === 'installment') {
+      preview.innerHTML = `Valor total <strong>${format.money(amount)}</strong> dividido em <strong>${qty}</strong> parcelas de <strong>${format.money(amount / qty)}</strong>.`;
+    } else {
+      preview.innerHTML = `Serão criados <strong>${qty}</strong> lançamentos recorrentes de <strong>${format.money(amount)}</strong> com periodicidade <strong>${freqLabel}</strong>.`;
+    }
+  };
+
+  const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  window.toggleCommitmentDetails = (force = null) => {
+    const modal = document.getElementById('commitmentModalBox');
+    const btn = document.getElementById('btnDetails');
+    if (!modal) return;
+    const shouldOpen = force === null ? !modal.classList.contains('details-open') : Boolean(force);
+    modal.classList.toggle('details-open', shouldOpen);
+    if (btn) btn.textContent = shouldOpen ? 'Ocultar detalhes' : 'Detalhes';
+  };
+
+  function setupMonthYearFilters() {
+    const mSelect = document.getElementById('filterMonth');
+    const ySelect = document.getElementById('filterYear');
+    if (!mSelect || !ySelect) return;
+    const now = new Date();
+    mSelect.innerHTML = monthNames.map((m, i) => `<option value="${i}" ${i === now.getMonth() ? 'selected' : ''}>${m}</option>`).join('');
+    const currentYear = now.getFullYear();
+    ySelect.innerHTML = [currentYear - 1, currentYear, currentYear + 1].map(y => `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`).join('');
+    updateClosedMonthLabel();
+  }
+
+  function ensureYearOption(year) {
+    const ySelect = document.getElementById('filterYear');
+    if (!ySelect) return;
+    const exists = Array.from(ySelect.options).some(opt => Number(opt.value) === Number(year));
+    if (!exists) {
+      const opt = document.createElement('option');
+      opt.value = String(year);
+      opt.textContent = String(year);
+      ySelect.appendChild(opt);
+      Array.from(ySelect.options)
+        .sort((a, b) => Number(a.value) - Number(b.value))
+        .forEach(opt => ySelect.appendChild(opt));
+    }
+  }
+
+  function updateClosedMonthLabel() {
+    const label = document.getElementById('closedMonthLabel');
+    const month = Number(document.getElementById('filterMonth')?.value ?? new Date().getMonth());
+    const year = Number(document.getElementById('filterYear')?.value ?? new Date().getFullYear());
+    if (label) label.textContent = `${monthNames[month]} / ${year}`;
+  }
+
+  window.changeClosedMonth = (offset) => {
+    const mSelect = document.getElementById('filterMonth');
+    const ySelect = document.getElementById('filterYear');
+    if (!mSelect || !ySelect) return;
+    let month = Number(mSelect.value);
+    let year = Number(ySelect.value);
+    month += offset;
+    if (month < 0) { month = 11; year -= 1; }
+    if (month > 11) { month = 0; year += 1; }
+    ensureYearOption(year);
+    mSelect.value = String(month);
+    ySelect.value = String(year);
+    updateClosedMonthLabel();
+    applyFilters();
+  };
+
+  function getSelectedMonthPeriod() {
+    const month = Number(document.getElementById('filterMonth')?.value ?? new Date().getMonth());
+    const year = Number(document.getElementById('filterYear')?.value ?? new Date().getFullYear());
+    const startStr = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const endStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    return { month, year, startStr, endStr };
+  }
+
+  window.toggleAdvancedFilters = () => {
+    const panel = document.getElementById('advancedFilters');
+    if (panel) panel.classList.toggle('open');
+  };
+
+  window.logout = async () => {
+    try { await logoutUser(); } catch (e) { alert('Erro ao sair: ' + e.message); }
+  };
+
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  function escapeHtml(value = '') {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function normalizeText(value) {
+    return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function getNameById(list, id) {
+    const item = (list || []).find(i => i.id === id);
+    return item ? (item.name || item.title || '') : '';
+  }
+
+  function getCategoryDisplayName(cat) {
+    if (!cat) return '';
+    if (!cat.parent_id) return cat.name || '';
+    const parent = categories.find(c => c.id === cat.parent_id);
+    return parent ? `${parent.name} › ${cat.name}` : cat.name;
+  }
+
+  function statusLabel(status, dueDate) {
+    const effective = effectiveStatus(status, dueDate);
+    return { planned: 'Previsto', overdue: 'Vencido', realized: 'Baixado', cancelled: 'Cancelado' }[effective] || effective;
+  }
+
+  function effectiveStatus(status, dueDate) {
+    if (status === 'realized' || status === 'cancelled') return status;
+    if (dueDate && dueDate < todayStr()) return 'overdue';
+    return status || 'planned';
+  }
+
+  function formatDateBr(dateStr) {
+    if (!dateStr) return '---';
+    const [y, m, d] = dateStr.substring(0, 10).split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function populateSelect(id, list, emptyLabel = null, mapper = null) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let html = emptyLabel ? `<option value="">${emptyLabel}</option>` : '';
+    html += (list || []).map(item => {
+      const label = mapper ? mapper(item) : (item.name || item.title || 'Sem nome');
+      return `<option value="${item.id}">${escapeHtml(label)}</option>`;
+    }).join('');
+    el.innerHTML = html;
+  }
+
+  function populateFilters() {
+    populateSelect('filterAccount', accounts, 'Todas');
+  }
+
+  function populateModalOptions() {
+    populateSelect('fAccount', accounts, null);
+    populateSelect('fCostCenter', costCenters, 'Sem centro de custo');
+    populateSelect('fTagPicker', tagsList, 'Adicionar tag...');
+    updateCategoriesByType();
+  }
+
+  function populateBatchEditOptions() {
+    const subs = categories
+      .filter(c => c.parent_id && c.is_active !== false)
+      .sort((a, b) => getCategoryDisplayName(a).localeCompare(getCategoryDisplayName(b), 'pt-BR'));
+    populateSelect('batchCategory', subs, 'Manter categoria atual', getCategoryDisplayName);
+    populateSelect('batchCostCenter', costCenters, 'Manter centro atual');
+  }
+
+  function getTransactionTagIds(item) {
+    const ids = [...(transactionTagsMap[item.id] || [])];
+    if (item.tag_id && !ids.includes(item.tag_id)) ids.unshift(item.tag_id);
+    if (Array.isArray(item.tag_ids)) {
+      item.tag_ids.forEach(id => { if (id && !ids.includes(id)) ids.push(id); });
+    }
+    return ids.filter(Boolean);
+  }
+
+  function renderSelectedTags() {
+    const wrap = document.getElementById('selectedTags');
+    if (!wrap) return;
+    if (!selectedTagIds.length) {
+      wrap.innerHTML = '';
+      return;
+    }
+    wrap.innerHTML = selectedTagIds.map(id => {
+      const name = escapeHtml(getNameById(tagsList, id) || 'Tag');
+      return `<span class="selected-tag-pill"># ${name}<button type="button" onclick="removeSelectedTag('${id}')" title="Remover tag">×</button></span>`;
+    }).join('');
+  }
+
+  window.addSelectedTagFromPicker = () => {
+    const picker = document.getElementById('fTagPicker');
+    const id = picker?.value || '';
+    if (!id) return;
+    if (!selectedTagIds.includes(id)) selectedTagIds.push(id);
+    picker.value = '';
+    renderSelectedTags();
+  };
+
+  window.removeSelectedTag = (id) => {
+    selectedTagIds = selectedTagIds.filter(tagId => tagId !== id);
+    renderSelectedTags();
+  };
+
+  async function loadTransactionTags(rows) {
+    transactionTagsMap = {};
+    try {
+      const links = await db.select('transaction_tags', { eq: { user_id: user.id } });
+      const ids = new Set((rows || []).map(i => i.id));
+      (links || []).forEach(link => {
+        if (!ids.has(link.transaction_id) || !link.tag_id) return;
+        if (!transactionTagsMap[link.transaction_id]) transactionTagsMap[link.transaction_id] = [];
+        if (!transactionTagsMap[link.transaction_id].includes(link.tag_id)) transactionTagsMap[link.transaction_id].push(link.tag_id);
+      });
+    } catch (err) {
+      transactionTagsMap = {};
+    }
+  }
+
+  async function syncTransactionTags(transactionId, tagIds) {
+    if (!transactionId) return;
+    try {
+      const existing = await db.select('transaction_tags', { eq: { user_id: user.id, transaction_id: transactionId } });
+      for (const row of existing || []) await db.delete('transaction_tags', row.id);
+      for (const tagId of tagIds || []) {
+        await db.insert('transaction_tags', {
+          user_id: user.id,
+          transaction_id: transactionId,
+          tag_id: tagId,
+          created_at: new Date().toISOString()
+        });
+      }
+    } catch (err) {
+      console.warn('Não foi possível sincronizar tags em transaction_tags. Mantendo tag principal.', err?.message || err);
+    }
+  }
+
+  window.updateCategoriesByType = () => {
+    const type = document.getElementById('fType')?.value || 'expense';
+    const subs = categories
+      .filter(c => c.parent_id && c.type === type && c.is_active !== false)
+      .sort((a, b) => getCategoryDisplayName(a).localeCompare(getCategoryDisplayName(b), 'pt-BR'));
+    populateSelect('fCategory', subs, 'Sem categoria', getCategoryDisplayName);
+  };
+
+  function getFilteredCommitments() {
+    const type = document.getElementById('filterType')?.value || '';
+    const status = document.getElementById('filterStatus')?.value || '';
+    const accountId = document.getElementById('filterAccount')?.value || '';
+    const from = document.getElementById('filterFrom')?.value || '';
+    const to = document.getElementById('filterTo')?.value || '';
+    const search = normalizeText(document.getElementById('filterSearch')?.value || '');
+    const monthPeriod = getSelectedMonthPeriod();
+    const start = from || monthPeriod.startStr;
+    const end = to || monthPeriod.endStr;
+
+    return commitments.filter(item => {
+      const due = item.due_date || item.data;
+      const eff = effectiveStatus(item.status, due);
+      const text = normalizeText(`${item.descricao || ''} ${getNameById(accounts, item.account_id)} ${getCategoryDisplayName(categories.find(c => c.id === item.category_id))}`);
+      const pendingDefault = status ? true : !['realized', 'cancelled'].includes(item.status);
+      return pendingDefault
+        && (!type || item.tipo === type)
+        && (!status || status === 'all' || eff === status)
+        && (!accountId || item.account_id === accountId)
+        && (!start || due >= start)
+        && (!end || due <= end)
+        && (!search || text.includes(search));
+    });
+  }
+
+  function accountCurrentBalance(accountId) {
+    const account = accounts.find(a => a.id === accountId);
+    return Number(account?.current_balance ?? account?.initial_balance ?? 0) || 0;
+  }
+
+  function getSummaryPeriodCommitments() {
+    const accountId = document.getElementById('filterAccount')?.value || '';
+    const from = document.getElementById('filterFrom')?.value || '';
+    const to = document.getElementById('filterTo')?.value || '';
+    const monthPeriod = getSelectedMonthPeriod();
+    const start = from || monthPeriod.startStr;
+    const end = to || monthPeriod.endStr;
+
+    return commitments.filter(item => {
+      const due = item.due_date || item.data;
+      return (!accountId || item.account_id === accountId)
+        && (!start || due >= start)
+        && (!end || due <= end);
+    });
+  }
+
+  function calculateSummary() {
+    // O resumo do período deve considerar apenas período e conta prevista,
+    // ignorando o campo "Visualizar" e demais filtros da grid.
+    const periodList = getSummaryPeriodCommitments();
+    const plannedList = periodList.filter(i => !['realized','cancelled'].includes(i.status));
+
+    const pay = plannedList
+      .filter(i => i.tipo === 'expense')
+      .reduce((s, i) => s + Number(i.amount || 0), 0);
+
+    const receive = plannedList
+      .filter(i => i.tipo === 'income')
+      .reduce((s, i) => s + Number(i.amount || 0), 0);
+
+    const overdue = plannedList
+      .filter(i => effectiveStatus(i.status, i.due_date || i.data) === 'overdue')
+      .reduce((s, i) => s + Number(i.amount || 0), 0);
+
+    const forecast = receive - pay;
+
+    document.getElementById('summaryPay').textContent = format.money(pay);
+    document.getElementById('summaryReceive').textContent = format.money(receive);
+    document.getElementById('summaryOverdue').textContent = format.money(overdue);
+    document.getElementById('summaryForecast').textContent = format.money(forecast);
+    document.getElementById('summaryForecast').style.color = forecast >= 0 ? 'var(--green)' : 'var(--danger)';
+  }
+
+  function renderList(list = getFilteredCommitments()) {
+    const body = document.getElementById('listBody');
+    const count = document.getElementById('tableCount');
+    count.textContent = list.length === commitments.length
+      ? `Mostrando ${list.length} compromisso${list.length === 1 ? '' : 's'}`
+      : `Mostrando ${list.length} de ${commitments.length} compromissos`;
+
+    calculateSummary();
+    selectedCommitmentIds = new Set([...selectedCommitmentIds].filter(id => list.some(i => i.id === id)));
+    updateSelectedTotal(list);
+    updateActiveFiltersLabel();
+
+    if (!list.length) {
+      body.innerHTML = '<div class="empty"><div class="icon">📅</div>Nenhum compromisso encontrado.</div>';
+      document.getElementById('selectAllRows')?.removeAttribute('checked');
+      return;
+    }
+
+    body.innerHTML = list.map(item => {
+      const due = item.due_date || item.data || '';
+      const eff = effectiveStatus(item.status, due);
+      const isExpense = item.tipo === 'expense';
+      const category = getCategoryDisplayName(categories.find(c => c.id === item.category_id)) || 'Sem categoria';
+      const accountName = getNameById(accounts, item.account_id) || 'Sem conta';
+      const costName = getNameById(costCenters, item.cost_center_id) || 'Sem centro';
+      const tagNames = getTransactionTagIds(item).map(id => getNameById(tagsList, id)).filter(Boolean);
+      const tagsText = tagNames.length ? `# ${tagNames.join(', ')}` : '';
+      const description = escapeHtml(item.descricao || 'Sem descrição');
+      const amount = Number(item.amount || 0);
+
+      return `
+        <div class="commitment-row">
+          <div class="select-cell">
+            <input class="row-check" type="checkbox" ${selectedCommitmentIds.has(item.id) ? 'checked' : ''} onchange="toggleRowSelection('${item.id}')" onclick="event.stopPropagation()">
+          </div>
+          <div class="due-date ${eff === 'overdue' ? 'overdue' : ''}">${formatDateBr(due)}</div>
+          <div class="commitment-main">
+            <div class="commitment-title" title="${description}">${description}</div>
+            <div class="commitment-meta">
+              <span>${isExpense ? 'A pagar' : 'A receber'}</span>
+              <span>🏷️ ${escapeHtml(category)}</span>
+              <span>🏢 ${escapeHtml(costName)}</span>
+              ${tagsText ? `<span>${escapeHtml(tagsText)}</span>` : ''}
+            </div>
+          </div>
+          <div class="money ${isExpense ? 'expense' : 'income'}">${isExpense ? '-' : '+'} ${format.money(amount)}</div>
+          <div><span title="${escapeHtml(accountName)}">${escapeHtml(accountName)}</span></div>
+          <div><span class="badge badge-${eff}">${statusLabel(item.status, due)}</span></div>
+          <div class="row-actions">
+            <button class="action-menu-btn" onclick="openActionMenu(event, '${item.id}')">...</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+
+
+  function updateActiveFiltersLabel() {
+    const el = document.getElementById('activeFiltersLabel');
+    if (!el) return;
+    const parts = [];
+    const type = document.getElementById('filterType')?.value;
+    const status = document.getElementById('filterStatus')?.value;
+    const accountId = document.getElementById('filterAccount')?.value;
+    const from = document.getElementById('filterFrom')?.value;
+    const to = document.getElementById('filterTo')?.value;
+    const search = document.getElementById('filterSearch')?.value;
+    if (type) parts.push(type === 'expense' ? 'a pagar' : 'a receber');
+    if (status) parts.push(status === 'all' ? 'todos os status' : 'status');
+    if (accountId) parts.push('conta');
+    if (from || to) parts.push('data');
+    if (search) parts.push('descrição');
+    el.textContent = parts.length ? `Filtros ativos: ${parts.join(', ')}` : 'Filtro padrão aplicado';
+  }
+
+  function updateSelectedTotal(baseList = getFilteredCommitments()) {
+    const selected = baseList.filter(item => selectedCommitmentIds.has(item.id));
+    const total = selected.reduce((sum, item) => {
+      const amount = Number(item.amount || 0);
+      return sum + (item.tipo === 'income' ? amount : -amount);
+    }, 0);
+    const el = document.getElementById('selectedTotal');
+    if (el) {
+      el.textContent = selected.length
+        ? `Selecionados: ${selected.length} • ${format.money(total)}`
+        : 'Selecionados: R$ 0,00';
+      el.style.color = total >= 0 ? 'var(--green)' : 'var(--danger)';
+    }
+
+    const selectAll = document.getElementById('selectAllRows');
+    if (selectAll) {
+      selectAll.checked = baseList.length > 0 && baseList.every(item => selectedCommitmentIds.has(item.id));
+      selectAll.indeterminate = baseList.some(item => selectedCommitmentIds.has(item.id)) && !selectAll.checked;
+    }
+  }
+
+  window.toggleRowSelection = (id) => {
+    if (selectedCommitmentIds.has(id)) selectedCommitmentIds.delete(id);
+    else selectedCommitmentIds.add(id);
+    updateSelectedTotal(getFilteredCommitments());
+  };
+
+  window.toggleSelectAllRows = () => {
+    const list = getFilteredCommitments();
+    const checked = document.getElementById('selectAllRows')?.checked;
+    list.forEach(item => {
+      if (checked) selectedCommitmentIds.add(item.id);
+      else selectedCommitmentIds.delete(item.id);
+    });
+    renderList(list);
+  };
+
+  window.applyFilters = () => renderList();
+
+  window.clearFilters = () => {
+    setupMonthYearFilters();
+    document.getElementById('filterType').value = 'expense';
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterAccount').value = '';
+    document.getElementById('filterFrom').value = '';
+    document.getElementById('filterTo').value = '';
+    document.getElementById('filterSearch').value = '';
+    selectedCommitmentIds.clear();
+    renderList();
+  };
+
+  function setScopeRowVisibility(item = null) {
+    const row = document.getElementById('editScopeRow');
+    if (!row) return;
+    const hasGroup = Boolean(item?.installment_group_id && (item.installment_total || 0) > 1);
+    row.classList.toggle('open', hasGroup);
+    document.getElementById('fEditScope').value = 'single';
+  }
+
+  window.openModal = (presetType = null) => {
+    editingId = null;
+    editingGroupId = null;
+    selectedTagIds = [];
+    renderSelectedTags();
+    document.getElementById('modalTitle').textContent = 'Novo Compromisso';
+    document.getElementById('fType').value = presetType || 'expense';
+    document.getElementById('fStatus').value = 'planned';
+    document.getElementById('fInclusionDate').value = todayStr();
+    document.getElementById('fRecurrenceMode').value = 'single';
+    document.getElementById('fRecurrenceFrequency').value = 'monthly';
+    document.getElementById('fInstallments').value = '';
+    setScopeRowVisibility(null);
+    handleRecurrenceModeChange();
+    document.getElementById('fDescription').value = '';
+    document.getElementById('fAmount').value = '';
+    document.getElementById('fDueDate').value = todayStr();
+    document.getElementById('fPaymentDate').value = '';
+    const mainAccount = accounts.find(a => a.is_main === true) || accounts[0];
+    if (mainAccount) document.getElementById('fAccount').value = mainAccount.id;
+    document.getElementById('fCostCenter').value = '';
+    updateCategoriesByType();
+    toggleCommitmentDetails(false);
+    document.getElementById('modalOverlay').classList.add('open');
+  };
+
+  window.closeModal = () => {
+    document.getElementById('modalOverlay').classList.remove('open');
+    editingId = null;
+    editingGroupId = null;
+    toggleCommitmentDetails(false);
+  };
+
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  });
+
+  window.editCommitment = (id) => {
+    const item = commitments.find(i => i.id === id);
+    if (!item) return;
+    editingId = id;
+    editingGroupId = item.installment_group_id || null;
+    selectedTagIds = getTransactionTagIds(item);
+    renderSelectedTags();
+    document.getElementById('modalTitle').textContent = 'Editar Compromisso';
+    document.getElementById('fType').value = item.tipo || 'expense';
+    document.getElementById('fStatus').value = item.status || 'planned';
+    document.getElementById('fInclusionDate').value = item.criado_em ? item.criado_em.substring(0, 10) : (item.created_at ? item.created_at.substring(0, 10) : todayStr());
+    document.getElementById('fRecurrenceMode').value = item.installment_total > 1 ? (item.is_recurring ? 'recurring' : 'installment') : 'single';
+    document.getElementById('fRecurrenceFrequency').value = item.recurring_frequency || 'monthly';
+    document.getElementById('fInstallments').value = item.installment_total > 1 ? item.installment_total : '';
+    setScopeRowVisibility(item);
+    handleRecurrenceModeChange();
+    document.getElementById('fDescription').value = String(item.descricao || '').replace(/\s\(\d+\/\d+\)$/, '');
+    const editMode = document.getElementById('fRecurrenceMode').value;
+    const editTotal = Number(item.installment_total || 1);
+    document.getElementById('fAmount').value = editMode === 'installment' && editTotal > 1
+      ? Number((Number(item.amount || 0) * editTotal).toFixed(2))
+      : (item.amount || '');
+    updateInstallmentPreview();
+    document.getElementById('fDueDate').value = item.due_date || item.data || todayStr();
+    document.getElementById('fPaymentDate').value = item.status === 'realized' ? (item.data || todayStr()) : '';
+    document.getElementById('fAccount').value = item.account_id || '';
+    document.getElementById('fCostCenter').value = item.cost_center_id || '';
+    updateCategoriesByType();
+    setTimeout(() => { document.getElementById('fCategory').value = item.category_id || ''; }, 0);
+    toggleCommitmentDetails(true);
+    document.getElementById('modalOverlay').classList.add('open');
+  };
+
+  function getPendingGroupItems(groupId) {
+    if (!groupId) return [];
+    return commitments.filter(i => i.installment_group_id === groupId && isPendingCommitment(i));
+  }
+
+  window.saveCommitment = async () => {
+    const type = document.getElementById('fType').value;
+    const status = document.getElementById('fStatus').value;
+    const description = document.getElementById('fDescription').value.trim();
+    const amount = parseFloat(document.getElementById('fAmount').value) || 0;
+    const dueDate = document.getElementById('fDueDate').value;
+    const paymentDate = document.getElementById('fPaymentDate').value;
+    const accountId = document.getElementById('fAccount').value;
+    const inclusionDate = document.getElementById('fInclusionDate').value || todayStr();
+    const recurrenceMode = document.getElementById('fRecurrenceMode').value || 'single';
+    const frequency = document.getElementById('fRecurrenceFrequency').value || 'monthly';
+    const installmentsCount = parseInt(document.getElementById('fInstallments').value || '0', 10);
+    const scope = document.getElementById('fEditScope')?.value || 'single';
+
+    if (!description) return toast('Informe a descrição.', 'error');
+    if (!amount || amount <= 0) return toast('Informe um valor válido.', 'error');
+    if (!dueDate) return toast('Informe a data de vencimento.', 'error');
+    if (!accountId) return toast('Informe a conta prevista.', 'error');
+    if (!editingId && recurrenceMode !== 'single' && (!installmentsCount || installmentsCount < 2)) {
+      return toast('Informe a quantidade de parcelas/recorrências maior que 1.', 'error');
+    }
+
+    const btn = document.getElementById('btnSave');
+    btn.disabled = true;
+
+    const basePayload = {
+      user_id: user.id,
+      descricao: description,
+      amount,
+      tipo: type,
+      account_id: accountId,
+      category_id: document.getElementById('fCategory').value || null,
+      cost_center_id: document.getElementById('fCostCenter').value || null,
+      status,
+      tag_id: selectedTagIds[0] || null,
+      criado_em: `${inclusionDate}T00:00:00.000Z`,
+      updated_at: new Date().toISOString()
+    };
+
+    try {
+      if (editingId) {
+        const current = commitments.find(i => i.id === editingId);
+        const groupId = current?.installment_group_id || editingGroupId;
+        const updateGroup = scope === 'pending_group' && groupId;
+        const targets = updateGroup ? getPendingGroupItems(groupId) : [current].filter(Boolean);
+
+        if (!targets.length) {
+          toast('Nenhuma parcela pendente encontrada para alteração.', 'error');
+          return;
+        }
+
+        for (let index = 0; index < targets.length; index++) {
+          const target = targets[index];
+          const itemDueDate = updateGroup ? addByFrequency(dueDate, index, frequency) : dueDate;
+          await updateTransactionSafe(target.id, {
+            ...basePayload,
+            descricao: updateGroup && targets.length > 1 ? `${description} (${index + 1}/${targets.length})` : description,
+            amount: recurrenceMode === 'installment' && updateGroup && targets.length > 1 ? Number((amount / targets.length).toFixed(2)) : amount,
+            data: status === 'realized' ? (paymentDate || todayStr()) : itemDueDate,
+            due_date: itemDueDate,
+            installment_group_id: groupId || target.installment_group_id || null,
+            installment_number: updateGroup ? index + 1 : (target.installment_number || 1),
+            installment_total: updateGroup ? targets.length : (target.installment_total || 1),
+            is_recurring: recurrenceMode === 'recurring',
+            recurring_frequency: recurrenceMode === 'single' ? null : frequency,
+            notes: recurrenceMode === 'installment' ? `Parcelado: valor total ${amount}` : (recurrenceMode === 'recurring' ? `Recorrente ${frequency}` : null)
+          });
+          await syncTransactionTags(target.id, selectedTagIds);
+        }
+
+        toast(updateGroup ? 'Parcelas pendentes atualizadas.' : 'Compromisso atualizado.');
+      } else {
+        const totalRows = recurrenceMode === 'single' ? 1 : installmentsCount;
+        const groupId = totalRows > 1 ? generateGroupId() : null;
+        const perInstallmentAmount = recurrenceMode === 'installment' && totalRows > 1
+          ? Number((amount / totalRows).toFixed(2))
+          : amount;
+
+        for (let index = 0; index < totalRows; index++) {
+          const itemDueDate = addByFrequency(dueDate, index, frequency);
+          const suffix = totalRows > 1 ? ` (${index + 1}/${totalRows})` : '';
+          const inserted = await insertTransactionSafe({
+            ...basePayload,
+            descricao: `${description}${suffix}`,
+            amount: perInstallmentAmount,
+            data: status === 'realized' ? (paymentDate || todayStr()) : itemDueDate,
+            due_date: itemDueDate,
+            installment_group_id: groupId,
+            installment_number: index + 1,
+            installment_total: totalRows,
+            is_recurring: recurrenceMode === 'recurring',
+            recurring_frequency: recurrenceMode === 'single' ? null : frequency,
+            notes: recurrenceMode === 'installment' ? `Parcelado: valor total ${amount}` : (recurrenceMode === 'recurring' ? `Recorrente ${frequency}` : null)
+          });
+          const newId = inserted?.id || inserted?.[0]?.id;
+          if (newId) await syncTransactionTags(newId, selectedTagIds);
+        }
+        toast(totalRows > 1 ? `${totalRows} compromissos criados.` : 'Compromisso criado.');
+      }
+      closeModal();
+      await loadData();
+    } catch (err) {
+      toast(err.message || 'Erro ao salvar compromisso.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  function openSettlementModal(ids, title = 'Baixar compromisso') {
+    const safeIds = (ids || []).filter(Boolean);
+    if (!safeIds.length) return;
+    const first = commitments.find(i => i.id === safeIds[0]);
+    document.getElementById('settlementTitle').textContent = title;
+    document.getElementById('settlementId').value = safeIds[0] || '';
+    document.getElementById('settlementIds').value = safeIds.join(',');
+    document.getElementById('settlementMode').value = safeIds.length > 1 ? 'batch' : 'single';
+    document.getElementById('settlementHint').innerHTML = safeIds.length > 1
+      ? `Serão baixados <strong>${safeIds.length}</strong> compromisso(s) pendente(s) selecionado(s).`
+      : '';
+    document.getElementById('settlementDate').value = todayStr();
+    populateSelect('settlementAccount', accounts, null);
+    const mainAccount = accounts.find(a => a.is_main === true) || accounts[0];
+    document.getElementById('settlementAccount').value = first?.account_id || mainAccount?.id || '';
+    document.getElementById('settlementModalOverlay').classList.add('open');
+  }
+
+
+  function getSelectedPendingCommitments() {
+    return [...selectedCommitmentIds]
+      .map(id => commitments.find(i => i.id === id))
+      .filter(item => item && isPendingCommitment(item));
+  }
+
+  window.openBatchEditDetails = () => {
+    const selectedTotal = selectedCommitmentIds.size;
+    const targets = getSelectedPendingCommitments();
+    if (!targets.length) {
+      toast('Selecione ao menos um título pendente para alterar.', 'error');
+      return;
+    }
+    populateBatchEditOptions();
+    document.getElementById('batchDueDate').value = '';
+    document.getElementById('batchCategory').value = '';
+    document.getElementById('batchCostCenter').value = '';
+    const ignored = selectedTotal - targets.length;
+    document.getElementById('batchEditHint').innerHTML = ignored > 0
+      ? `Serão alterados <strong>${targets.length}</strong> título(s) pendente(s). <strong>${ignored}</strong> baixado(s) ou cancelado(s) serão ignorados.`
+      : `Serão alterados <strong>${targets.length}</strong> título(s) pendente(s) selecionado(s).`;
+    document.getElementById('batchEditModalOverlay').classList.add('open');
+  };
+
+  window.closeBatchEditModal = () => {
+    document.getElementById('batchEditModalOverlay').classList.remove('open');
+  };
+
+  document.getElementById('batchEditModalOverlay')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('batchEditModalOverlay')) closeBatchEditModal();
+  });
+
+  window.confirmBatchEditDetails = async () => {
+    const targets = getSelectedPendingCommitments();
+    if (!targets.length) return toast('Nenhum título pendente selecionado.', 'error');
+
+    const dueDate = document.getElementById('batchDueDate').value;
+    const categoryId = document.getElementById('batchCategory').value;
+    const costCenterId = document.getElementById('batchCostCenter').value;
+
+    const payload = { updated_at: new Date().toISOString() };
+    if (dueDate) payload.due_date = dueDate;
+    if (dueDate) payload.data = dueDate;
+    if (categoryId) payload.category_id = categoryId;
+    if (costCenterId) payload.cost_center_id = costCenterId;
+
+    if (Object.keys(payload).length === 1) {
+      return toast('Informe ao menos um detalhe para alterar.', 'error');
+    }
+
+    const btn = document.getElementById('btnBatchEdit');
+    btn.disabled = true;
+    try {
+      for (const item of targets) {
+        await updateTransactionSafe(item.id, payload);
+      }
+      closeBatchEditModal();
+      selectedCommitmentIds.clear();
+      toast(`${targets.length} título(s) pendente(s) atualizado(s).`);
+      await loadData();
+    } catch (err) {
+      toast(err.message || 'Erro ao alterar títulos em lote.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  window.openBatchSettlement = () => {
+    const ids = [...selectedCommitmentIds]
+      .map(id => commitments.find(i => i.id === id))
+      .filter(item => item && isPendingCommitment(item))
+      .map(item => item.id);
+
+    if (!ids.length) {
+      toast('Selecione ao menos um compromisso pendente para baixar.', 'error');
+      return;
+    }
+
+    openSettlementModal(ids, 'Baixar compromissos selecionados');
+  };
+
+  window.setRealized = async (id) => {
+    const item = commitments.find(i => i.id === id);
+    if (!item) return;
+    openSettlementModal([id], item.tipo === 'expense' ? 'Baixar pagamento' : 'Baixar recebimento');
+  };
+
+  window.closeSettlementModal = () => {
+    document.getElementById('settlementModalOverlay').classList.remove('open');
+    document.getElementById('settlementId').value = '';
+    document.getElementById('settlementIds').value = '';
+    document.getElementById('settlementMode').value = 'single';
+    document.getElementById('settlementHint').innerHTML = '';
+  };
+
+  document.getElementById('settlementModalOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('settlementModalOverlay')) closeSettlementModal();
+  });
+
+  window.confirmSettlement = async () => {
+    const ids = (document.getElementById('settlementIds').value || document.getElementById('settlementId').value || '')
+      .split(',')
+      .map(id => id.trim())
+      .filter(Boolean);
+    const paymentDate = document.getElementById('settlementDate').value;
+    const accountId = document.getElementById('settlementAccount').value;
+
+    if (!ids.length) return toast('Nenhum compromisso selecionado para baixa.', 'error');
+    if (!paymentDate) return toast('Informe a data da baixa.', 'error');
+    if (!accountId) return toast('Informe a conta para baixa.', 'error');
+
+    const targets = ids.map(id => commitments.find(i => i.id === id)).filter(item => item && isPendingCommitment(item));
+    if (!targets.length) return toast('Nenhum compromisso pendente encontrado para baixa.', 'error');
+
+    const btn = document.getElementById('btnSettle');
+    btn.disabled = true;
+    try {
+      for (const item of targets) {
+        await updateTransactionSafe(item.id, {
+          status: 'realized',
+          account_id: accountId,
+          data: paymentDate,
+          due_date: item.due_date || item.data,
+          updated_at: new Date().toISOString()
+        });
+      }
+      closeSettlementModal();
+      selectedCommitmentIds.clear();
+      toast(targets.length > 1 ? `${targets.length} compromissos baixados.` : (targets[0].tipo === 'expense' ? 'Pagamento baixado.' : 'Recebimento baixado.'));
+      await loadData();
+    } catch (err) {
+      toast(err.message || 'Erro ao baixar compromisso.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  window.cancelCommitment = async (id) => {
+    if (!confirm('Deseja cancelar este compromisso?')) return;
+    try {
+      await db.update('transactions', { status: 'cancelled', updated_at: new Date().toISOString() }, id);
+      toast('Compromisso cancelado.');
+      await loadData();
+    } catch (err) {
+      toast(err.message || 'Erro ao cancelar.', 'error');
+    }
+  };
+
+  window.deleteCommitment = async (id) => {
+    const item = commitments.find(i => i.id === id);
+    if (!item) return toast('Compromisso não encontrado.', 'error');
+
+    let scope = 'single';
+    const hasGroup = Boolean(item.installment_group_id && (item.installment_total || 0) > 1);
+    if (hasGroup) {
+      const applyAll = confirm('Este lançamento faz parte de um grupo. Clique em OK para excluir todas as parcelas pendentes do grupo ou Cancelar para excluir somente esta parcela.');
+      scope = applyAll ? 'pending_group' : 'single';
+    }
+
+    const targets = scope === 'pending_group'
+      ? getPendingGroupItems(item.installment_group_id)
+      : [item];
+
+    if (!targets.length) return toast('Nenhuma parcela pendente encontrada para exclusão.', 'error');
+
+    const msg = scope === 'pending_group'
+      ? `Deseja excluir ${targets.length} parcela(s) pendente(s) deste grupo? Parcelas baixadas/canceladas serão preservadas.`
+      : 'Deseja excluir este compromisso?';
+    if (!confirm(msg)) return;
+
+    try {
+      for (const target of targets) {
+        await db.delete('transactions', target.id);
+      }
+      toast(scope === 'pending_group' ? 'Parcelas pendentes excluídas.' : 'Compromisso excluído.');
+      await loadData();
+    } catch (err) {
+      toast(err.message || 'Erro ao excluir.', 'error');
+    }
+  };
+
+  window.openActionMenu = (event, id) => {
+    event.stopPropagation();
+    const menu = document.getElementById('globalActionMenu');
+    const item = commitments.find(i => i.id === id);
+    if (!menu || !item) return;
+    const canSetRealized = !['realized','cancelled'].includes(item.status);
+
+    menu.innerHTML = `
+      <button type="button" onclick="editCommitment('${id}'); closeActionMenu();">Alterar</button>
+      ${canSetRealized ? `<button type="button" onclick="setRealized('${id}'); closeActionMenu();">Baixar</button>` : ''}
+      ${item.status !== 'cancelled' ? `<button type="button" onclick="cancelCommitment('${id}'); closeActionMenu();">Cancelar</button>` : ''}
+      <button type="button" class="danger" onclick="deleteCommitment('${id}'); closeActionMenu();">Excluir</button>
+    `;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    menu.classList.add('open');
+    const menuWidth = 170;
+    const menuHeight = 160;
+    let left = rect.right - menuWidth;
+    let top = rect.bottom + 8;
+    if (left < 8) left = 8;
+    if (top + menuHeight > window.innerHeight - 8) top = rect.top - menuHeight - 8;
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+  };
+
+  window.closeActionMenu = () => document.getElementById('globalActionMenu')?.classList.remove('open');
+
+  document.addEventListener('click', (event) => {
+    const menu = document.getElementById('globalActionMenu');
+    if (!menu) return;
+    if (!menu.contains(event.target) && !event.target.classList.contains('action-menu-btn')) closeActionMenu();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeActionMenu();
+  });
+
+  async function loadOptions() {
+    const [accs, cats, costs] = await Promise.all([
+      db.select('accounts', { eq: { user_id: user.id }, order: { column: 'name', asc: true } }),
+      db.select('categories', { eq: { user_id: user.id }, order: { column: 'name', asc: true } }),
+      db.select('cost_centers', { eq: { user_id: user.id }, order: { column: 'name', asc: true } })
+    ]);
+    let tags = [];
+    try {
+      tags = await db.select('tags', { eq: { user_id: user.id }, order: { column: 'name', asc: true } });
+    } catch (err) {
+      tags = [];
+    }
+    accounts = accs || [];
+    categories = cats || [];
+    costCenters = costs || [];
+    tagsList = tags || [];
+    populateFilters();
+    populateModalOptions();
+  }
+
+  async function loadData() {
+    try {
+      const rows = await db.select('transactions', {
+        eq: { user_id: user.id },
+        order: { column: 'due_date', asc: true }
+      });
+      commitments = (rows || [])
+        .filter(t => ['planned','overdue','realized','cancelled'].includes(t.status) && (t.due_date || t.data))
+        .sort((a, b) => String(a.due_date || a.data || '').localeCompare(String(b.due_date || b.data || '')));
+      await loadTransactionTags(commitments);
+      renderList();
+    } catch (err) {
+      console.error(err);
+      toast('Erro ao carregar compromissos.', 'error');
+    }
+  }
+
+  (async () => {
+    try {
+      restoreSidebarState();
+      initSupabase();
+      user = await getCurrentUser();
+      if (!user) {
+        window.location.href = '/public/login.html';
+        return;
+      }
+      setupMonthYearFilters();
+      const urlType = new URLSearchParams(window.location.search).get('type');
+      if (urlType === 'income' || urlType === 'expense') document.getElementById('filterType').value = urlType;
+      else document.getElementById('filterType').value = 'expense';
+      updateClosedMonthLabel();
+      await loadOptions();
+      await loadData();
+    } catch (err) {
+      console.error('Erro inicial:', err);
+      alert(err.message);
+    }
+  })();
+</script>
+</body>
+</html>

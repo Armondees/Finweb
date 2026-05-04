@@ -4,175 +4,693 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Centros de Custo - FinWeb</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:     #020617;
-      --card:   #0f172a;
+      --bg: #020617;
+      --card: #0f172a;
+      --card-soft: #111c31;
       --border: #1e293b;
-      --text:   #e2e8f0;
-      --muted:  #94a3b8;
-      --green:  #22c55e;
-      --cyan:   #06b6d4;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #22c55e;
+      --green-dark: #16a34a;
+      --cyan: #06b6d4;
       --danger: #ef4444;
+      --warning: #f59e0b;
+      --purple: #8b5cf6;
+      --shadow: 0 18px 45px rgba(0,0,0,0.22);
     }
-    
-    .badge-personal { background: rgba(34, 197, 94, 0.1); color: var(--green); }
-    .badge-business { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
-    .badge-project  { background: rgba(6, 182, 212, 0.1); color: var(--cyan); }
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { display: flex; background: var(--bg); color: var(--text); min-height: 100vh; }
-    
-    /* SIDEBAR */
-    .sidebar { width: 220px; height: 100vh; position: sticky; top: 0; background: var(--card); border-right: 1px solid var(--border); padding: 24px 16px; display: flex; flex-direction: column; }
-    .logo { font-size: 20px; font-weight: 600; margin-bottom: 32px; padding: 0 8px; }
-    .logo span { color: var(--green); }
-    .menu { flex: 1; }
-    .menu a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 4px; border-radius: 8px; text-decoration: none; color: var(--muted); font-size: 14px; transition: all 0.15s; cursor: pointer; }
-    .menu a:hover, .menu a.active { background: rgba(34,197,94,0.1); color: var(--green); }
-    .menu a.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
-    
-    .menu-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 12px 12px 6px; font-weight: 600; opacity: 0.7; display: block; }
-    .menu-divider { border: 0; border-top: 1px solid var(--border); margin: 10px 12px; opacity: 0.5; }
-    
-    /* MAIN */
-    .main { flex: 1; padding: 28px 32px; overflow-y: auto; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    
-    .btn { padding: 9px 18px; border-radius: 8px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; }
-    .btn-primary { background: linear-gradient(90deg, var(--green), var(--cyan)); color: white; }
-    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-    .btn-sm { padding: 5px 10px; font-size: 12px; }
 
-    .cost-centers-list { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .list-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 120px; padding: 14px 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; color: var(--muted); }
-    .row-item { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 120px; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); }
-    
-    /* MODAL */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    html, body { min-height: 100dvh; }
+    body {
+      display: flex;
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,0.08), transparent 32%),
+        radial-gradient(circle at top right, rgba(6,182,212,0.05), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 220px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.92);
+      border-right: 1px solid var(--border);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(12px);
+      transition: width .2s ease, padding .2s ease;
+      overflow-x: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: 72px;
+      padding: 20px 10px;
+    }
+
+    .sidebar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      padding: 0 8px;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .logo span { color: var(--green); }
+
+    .sidebar-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: rgba(2,6,23,.55);
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      transition: all .18s ease;
+    }
+    .sidebar-toggle:hover {
+      color: var(--green);
+      border-color: rgba(34,197,94,.42);
+      background: rgba(34,197,94,.08);
+    }
+
+    .menu { flex: 1; }
+    .menu a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 4px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      transition: all 0.18s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .menu a .menu-text { overflow: hidden; text-overflow: ellipsis; }
+    .sidebar.collapsed .logo { width: 0; padding: 0; }
+    .sidebar.collapsed .menu-label,
+    .sidebar.collapsed .menu a .menu-text { display: none; }
+    .sidebar.collapsed .menu a { justify-content: center; padding: 10px; gap: 0; }
+    .sidebar.collapsed .menu-divider { margin: 10px 8px; }
+    .menu a:hover, .menu a.active {
+      background: rgba(34,197,94,0.12);
+      color: var(--green);
+    }
+    .menu a.danger:hover {
+      background: rgba(239,68,68,0.1);
+      color: var(--danger);
+    }
+
+    .menu-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      padding: 12px 12px 6px;
+      font-weight: 700;
+      opacity: 0.7;
+      display: block;
+    }
+
+    .menu-divider {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 10px 12px;
+      opacity: 0.5;
+    }
+
+
+    .main.cost-centers-page {
+      flex: 1;
+      height: 100dvh;
+      padding: 18px 24px max(24px, env(safe-area-inset-bottom));
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+
+    .page-header {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 18px; margin-bottom: 12px; flex: 0 0 auto;
+    }
+    .page-title h2 { font-size: 21px; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 4px; }
+    .page-title p { font-size: 12px; color: var(--muted); }
+
+    .btn {
+      padding: 10px 18px; border-radius: 10px; border: 1px solid transparent;
+      cursor: pointer; font-weight: 600; transition: all 0.2s ease;
+      color: var(--text); background: #334155; white-space: nowrap; font-size: 14px;
+    }
+    .btn:hover { transform: translateY(-1px); opacity: 0.95; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--green), var(--green-dark)); color: white; box-shadow: 0 10px 24px rgba(34,197,94,0.22); }
+    .btn-secondary, .btn-ghost { background: rgba(15, 23, 42, 0.9); border-color: var(--border); color: var(--text); }
+    .btn-danger { background: rgba(239,68,68,0.12); color: var(--danger); border-color: rgba(239,68,68,0.22); }
+    .btn.full { width: 100%; }
+
+    .card {
+      background: linear-gradient(145deg, rgba(15,23,42,0.98), rgba(10,17,32,0.98));
+      border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow);
+    }
+
+    .cost-layout {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+    .cost-side { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+    .side-card { padding: 14px 16px; border-radius: 15px; }
+    .side-card-title { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(148,163,184,.12); }
+    .side-card-title span { font-size: 13px; font-weight: 700; color: var(--text); }
+    .side-card-title small { font-size: 10.5px; color: var(--muted); line-height: 1.35; }
+
+    .summary-line { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 7px 0; border-bottom: 1px solid rgba(148,163,184,.08); font-size: 12px; color: var(--muted); }
+    .summary-line:last-child { border-bottom: none; }
+    .summary-line strong { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .summary-line.total strong { color: var(--cyan); font-size: 14px; }
+    .summary-line.active strong { color: var(--green); }
+    .summary-line.inactive strong { color: var(--danger); }
+    .summary-line.types strong { color: var(--purple); }
+
+    .filter-field { margin-bottom: 9px; }
+    .filter-field label, .modal label {
+      font-size: 9.5px; color: #8aa0bd; text-transform: uppercase;
+      letter-spacing: .045em; font-weight: 700; margin-bottom: 5px; display: block;
+    }
+    input, select, textarea {
+      width: 100%; height: 34px; padding: 7px 9px;
+      background: rgba(2,6,23,0.88); border: 1px solid var(--border);
+      color: white; border-radius: 8px; font-size: 12px; outline: none; transition: all 0.2s ease;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,0.13); }
+    input::placeholder, textarea::placeholder { color: #64748b; }
+
+    .cost-grid-card {
+      min-width: 0; min-height: 0; height: 100%; display: flex; flex-direction: column;
+      overflow: visible; border-radius: 15px;
+    }
+    .grid-topbar {
+      flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center;
+      gap: 16px; padding: 11px 14px; border-bottom: 1px solid var(--border); background: rgba(2,6,23,.25);
+    }
+    .grid-topbar strong { font-size: 12.5px; color: var(--text); }
+    .grid-topbar small { display: block; margin-top: 3px; font-size: 10.5px; color: var(--muted); }
+
+    .list-header {
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 120px 110px 74px;
+      gap: 14px;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(30,41,59,0.9);
+      background: rgba(255,255,255,0.025);
+      color: #a9c0df;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+    .cost-list-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; }
+    .cc-row {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 120px 110px 74px;
+      align-items: center; gap: 14px; padding: 13px 14px;
+      border-bottom: 1px solid rgba(30,41,59,0.9); transition: background .18s ease;
+    }
+    .cc-row:nth-child(even) { background: rgba(255,255,255,0.012); }
+    .cc-row:hover { background: rgba(34,197,94,0.04); }
+    .cc-info { display: flex; gap: 10px; align-items: center; min-width: 0; }
+    .cc-dot { width: 12px; height: 12px; border-radius: 999px; flex: 0 0 auto; box-shadow: 0 0 0 3px rgba(255,255,255,0.04); background: var(--row-color, var(--cyan)); }
+    .cc-avatar {
+      width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+      background: rgba(6,182,212,0.10); border: 1px solid rgba(255,255,255,0.05);
+      font-size: 12px; font-weight: 700; color: #e5edf8; flex: 0 0 auto;
+    }
+    .cc-text { min-width: 0; }
+    .cc-name { font-size: 13px; font-weight: 650; line-height: 1.25; color: #e5edf8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cc-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 4px; font-size: 10.5px; color: rgba(148,163,184,0.78); line-height: 1.25; }
+    .cc-meta span + span::before { content: '•'; margin-right: 5px; color: rgba(148,163,184,0.45); }
+    .cc-desc { margin-top: 3px; font-size: 10.5px; color: rgba(148,163,184,0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
+    .badge-personal { background: rgba(34,197,94,0.13); color: var(--green); }
+    .badge-business { background: rgba(168,85,247,0.14); color: #a855f7; }
+    .badge-project { background: rgba(6,182,212,0.13); color: var(--cyan); }
+    .badge-family { background: rgba(245,158,11,0.14); color: var(--warning); }
+    .badge-other { background: rgba(148,163,184,0.14); color: #cbd5e1; }
+    .badge-active { background: rgba(34,197,94,0.12); color: var(--green); }
+    .badge-inactive { background: rgba(239,68,68,0.12); color: var(--danger); }
+
+    .cc-actions { text-align: right; position: relative; }
+    .action-menu-btn {
+      width: 34px; height: 30px; border-radius: 9px; border: 1px solid rgba(148,163,184,0.13);
+      background: rgba(15,23,42,0.72); color: rgba(226,232,240,0.82);
+      cursor: pointer; font-size: 16px; line-height: 1; font-weight: 700; transition: all .18s ease;
+    }
+    .action-menu-btn:hover { color: white; border-color: rgba(34,197,94,0.48); background: rgba(34,197,94,0.08); }
+    .global-action-menu {
+      display: none; position: fixed; min-width: 150px; padding: 6px; border: 1px solid var(--border);
+      border-radius: 12px; background: #0b1220; box-shadow: 0 18px 45px rgba(0,0,0,.42); z-index: 9999;
+    }
+    .global-action-menu.open { display: block; }
+    .global-action-menu button { width: 100%; border: 0; background: transparent; color: var(--text); padding: 9px 10px; border-radius: 9px; text-align: left; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+    .global-action-menu button:hover { background: rgba(34,197,94,0.10); }
+    .global-action-menu button.danger { color: var(--danger); }
+    .global-action-menu button.danger:hover { background: rgba(239,68,68,0.10); }
+
+    .list-footer { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px max(14px, env(safe-area-inset-bottom)); min-height: 42px; border-top: 1px solid var(--border); background: rgba(15,23,42,0.96); color: var(--muted); font-size: 11.5px; }
+    .empty { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 13px; }
+    .empty .icon { font-size: 36px; margin-bottom: 12px; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.open { display: flex; }
-    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 480px; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; }
+    .modal { background: var(--card); padding: 28px; border-radius: 16px; width: 100%; max-width: 500px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .modal h3 { margin-bottom: 20px; font-size: 18px; font-weight: 700; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group input, .form-group select { height: 38px; padding: 9px 11px; font-size: 13px; border-radius: 10px; }
+    .form-group textarea { font-size: 13px; border-radius: 10px; }
+    .form-group select option { background: var(--card); }
+
+    .color-picker-wrap { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: rgba(2,6,23,0.45); }
+    .color-preview { width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.18); box-shadow: inset 0 0 0 4px rgba(2,6,23,0.35); cursor: pointer; }
+    .color-picker-wrap input[type="color"] { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+    .color-palette-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; text-transform: none; letter-spacing: 0; font-weight: 600; }
+    .color-presets { display: flex; gap: 8px; flex-wrap: wrap; }
+    .color-preset { width: 22px; height: 22px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.08); cursor: pointer; transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; }
+    .color-preset:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.55); }
+    .color-preset.selected { border-color: var(--text); box-shadow: 0 0 0 3px rgba(255,255,255,0.08); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+    .transfer-warning {
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border: 1px solid rgba(245,158,11,0.28);
+      border-radius: 12px;
+      background: rgba(245,158,11,0.08);
+      color: #fbbf24;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .transfer-warning strong { color: #fde68a; }
+
+    .toast { position: fixed; bottom: max(24px, env(safe-area-inset-bottom)); right: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; font-size: 13px; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--green); color: var(--green); }
+    .toast.error { border-color: var(--danger); color: var(--danger); }
+
+    @media (max-width: 1100px) {
+      body { overflow: auto; }
+      .main.cost-centers-page { height: auto; min-height: 100dvh; overflow: visible; }
+      .cost-layout { grid-template-columns: 1fr; }
+      .cost-side { height: auto; }
+      .cost-grid-card { min-height: 560px; }
+    }
+    @media (max-width: 768px) {
+      body { display: block; }
+      .sidebar { display: none; }
+      .main.cost-centers-page { padding: 18px 14px; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .list-header, .cc-row { grid-template-columns: minmax(220px,1fr) 105px 90px 60px; min-width: 640px; }
+      .cost-list-scroll { overflow-x: auto; }
+    }
   </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <div class="logo">Fin<span>Web</span></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="logo">Fin<span>Web</span></div>
+    <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" title="Recolher/expandir menu">☰</button>
+  </div>
 
   <nav class="menu">
     <div class="menu-label">Movimentações</div>
-    <a href="/public/dashboard.html">📊 Dashboard</a>
-    <a href="/public/transactions.html">💸 Transações</a>
-    <a href="/public/cards.html">💳 Cartões</a>
-    
+    <a href="/public/dashboard.html" id="link-dash" title="Dashboard">📊 <span class="menu-text">Dashboard</span></a>
+    <a href="/public/transactions.html" id="link-tx" title="Transações">💸 <span class="menu-text">Transações</span></a>
+    <a href="/public/payables_receivables.html?type=expense" title="Pagar/Receber">📅 <span class="menu-text">Pagar/Receber</span></a>
+    <a href="/public/cards.html" title="Cartões">💳 <span class="menu-text">Cartões</span></a>
+
     <hr class="menu-divider">
 
     <div class="menu-label">Demonstrativos</div>
-    <a href="/public/reports.html">📈 Relatórios</a>
-    <a href="#">🌊 Fluxo de Caixa</a>
-    
+    <a href="/public/reports.html" title="Relatórios">📈 <span class="menu-text">Relatórios</span></a>
+    <a href="#" title="Fluxo de Caixa">🌊 <span class="menu-text">Fluxo de Caixa</span></a>
+
     <hr class="menu-divider">
 
     <div class="menu-label">Cadastro</div>
-    <a href="/public/accounts.html">🏦 Contas</a>
-    <a href="/public/categories.html">🏷️ Categorias</a>
-    <a href="/public/cost_centers.html" class="active">🏢 Centro de Custos</a>
-    <a href="/public/tags.html">🏷️ Tags</a>
+    <a href="/public/accounts.html" title="Contas">🏦 <span class="menu-text">Contas</span></a>
+    <a href="/public/categories.html" title="Categorias">🏷️ <span class="menu-text">Categorias</span></a>
+    <a href="/public/cost_centers.html" class="active" title="Centro de Custos">🏢 <span class="menu-text">Centro de Custos</span></a>
+    <a href="/public/Tags.html" title="Tags">🏷️ <span class="menu-text">Tags</span></a>
 
     <hr class="menu-divider">
-    <!-- CORREÇÃO DO BOTÃO SAIR[cite: 1, 4] -->
-    <a onclick="logout()" class="danger" style="cursor:pointer">🚪 Sair</a>
+    <a onclick="logout()" class="danger" style="cursor:pointer" title="Sair">🚪 <span class="menu-text">Sair</span></a>
   </nav>
 </div>
 
-<div class="main">
+<div class="main cost-centers-page">
   <div class="page-header">
-    <h2>🏢 Centros de Custo</h2>
+    <div class="page-title">
+      <h2>🏢 Centros de Custo</h2>
+      <p>Organize e acompanhe seus centros de custo financeiros.</p>
+    </div>
     <button class="btn btn-primary" onclick="openModal()">+ Novo Centro</button>
   </div>
 
-  <div class="cost-centers-list">
-    <div class="list-header">
-      <div>Nome / Código</div>
-      <div>Tipo</div>
-      <div>Status</div>
-      <div>Descrição</div>
-      <div style="text-align: right;">Ações</div>
-    </div>
-    <div id="listBody">
-      <div class="empty" style="padding: 40px; text-align: center; color: var(--muted);">Carregando...</div>
-    </div>
+  <div class="cost-layout">
+    <aside class="cost-side">
+      <section class="card side-card">
+        <div class="side-card-title">
+          <span>Resumo dos centros</span>
+          <small>Visão consolidada dos centros de custo cadastrados.</small>
+        </div>
+        <div class="summary-line total"><span>Total</span><strong id="statTotal">—</strong></div>
+        <div class="summary-line active"><span>Ativos</span><strong id="statActive">—</strong></div>
+        <div class="summary-line inactive"><span>Inativos</span><strong id="statInactive">—</strong></div>
+        <div class="summary-line types"><span>Tipos usados</span><strong id="statTypes">—</strong></div>
+      </section>
+
+      <section class="card side-card">
+        <div class="side-card-title">
+          <span>Filtros</span>
+          <small>Refine a lista sem alterar os dados cadastrados.</small>
+        </div>
+        <div class="filter-field">
+          <label>Descrição</label>
+          <input type="text" id="filterDescription" placeholder="Buscar nome, código ou descrição..." oninput="applyFilters()">
+        </div>
+        <div class="filter-field">
+          <label>Tipo</label>
+          <select id="filterType" onchange="applyFilters()">
+            <option value="all">Todos</option>
+            <option value="personal">Pessoal</option>
+            <option value="business">Negócio</option>
+            <option value="project">Projeto</option>
+            <option value="family">Família</option>
+            <option value="other">Outro</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>Status</label>
+          <select id="filterStatus" onchange="applyFilters()">
+            <option value="all">Todos</option>
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-secondary full" onclick="clearFilters()">Limpar filtros</button>
+      </section>
+    </aside>
+
+    <section class="card cost-grid-card">
+      <div class="grid-topbar">
+        <div>
+          <strong>Seus centros de custo</strong>
+          <small id="costListLabel">Centros usados para classificação financeira</small>
+        </div>
+      </div>
+
+      <div class="list-header">
+        <div>Nome / Código</div>
+        <div>Tipo</div>
+        <div>Status</div>
+        <div style="text-align:right">Ações</div>
+      </div>
+
+      <div class="cost-list-scroll" id="listBody">
+        <div class="empty"><div class="icon">⏳</div>Carregando...</div>
+      </div>
+
+      <div class="list-footer">
+        <span id="tableCount">Mostrando 0 centros</span>
+        <span>Ações disponíveis no menu da linha</span>
+      </div>
+    </section>
   </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3 id="modalTitle">Novo Centro de Custo</h3>
-    <br>
-    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div class="form-group">
-            <label>Código</label>
-            <input type="text" id="fCode" placeholder="Ex: 100.01">
-        </div>
-        <div class="form-group">
-            <label>Tipo *</label>
-            <select id="fType">
-              <option value="personal">Pessoal</option>
-              <option value="business">Negócio</option>
-              <option value="project">Projeto</option>
-              <option value="family">Família</option>
-              <option value="other">Outro</option>
-            </select>
-        </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Código</label>
+        <input type="text" id="fCode" placeholder="Ex.: 100.01">
+      </div>
+      <div class="form-group">
+        <label>Tipo *</label>
+        <select id="fType">
+          <option value="personal">Pessoal</option>
+          <option value="business">Negócio</option>
+          <option value="project">Projeto</option>
+          <option value="family">Família</option>
+          <option value="other">Outro</option>
+        </select>
+      </div>
     </div>
+
     <div class="form-group">
       <label>Nome *</label>
-      <input type="text" id="fName">
+      <input type="text" id="fName" placeholder="Ex.: Administrativo, Marketing, Família">
     </div>
+
     <div class="form-group">
-        <label>Descrição</label>
-        <textarea id="fDescription" rows="2"></textarea>
+      <label>Descrição</label>
+      <textarea id="fDescription" rows="2" placeholder="Breve descrição sobre o uso deste centro de custo"></textarea>
     </div>
-    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div class="form-group">
-            <label>Status</label>
-            <select id="fActive">
-              <option value="true">Ativo</option>
-              <option value="false">Inativo</option>
-            </select>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Status</label>
+        <select id="fActive">
+          <option value="true">Ativo</option>
+          <option value="false">Inativo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Cor</label>
+        <div class="color-picker-wrap">
+          <label class="color-preview" id="colorPreview" for="fColor" title="Escolher cor"></label>
+          <input type="color" id="fColor" value="#06b6d4">
+          <div>
+            <div class="color-palette-label">Escolha uma cor sutil</div>
+            <div class="color-presets" id="colorPresets"></div>
+          </div>
         </div>
-        <div class="form-group">
-            <label>Cor</label>
-            <input type="color" id="fColor" value="#06b6d4" style="height: 40px;">
-        </div>
+      </div>
     </div>
-    <div class="modal-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="btnSave" onclick="saveCostCenter()">Salvar</button>
     </div>
   </div>
 </div>
 
+<div class="modal-overlay" id="transferModalOverlay">
+  <div class="modal">
+    <h3 id="transferModalTitle">Transferir lançamentos</h3>
+
+    <div class="transfer-warning" id="transferWarningText">
+      Este centro de custo possui lançamentos vinculados. Antes de inativar ou excluir, transfira os lançamentos para outro centro de custo.
+    </div>
+
+    <div class="form-group">
+      <label>Transferir para *</label>
+      <select id="transferCostCenterId"></select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeTransferModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btnTransfer" onclick="transferAndApplyCostCenterAction()">Transferir e continuar</button>
+    </div>
+  </div>
+</div>
+
+<div class="global-action-menu" id="globalActionMenu"></div>
+<div class="toast" id="toast"></div>
+
 <script type="module">
   import { initSupabase, getCurrentUser, db } from '../src/js/utils/db.js';
-  import { logoutUser } from '../src/js/modules/auth.js'; // IMPORTAÇÃO DO LOGOUT[cite: 1]
+  import { logoutUser } from '../src/js/modules/auth.js';
 
   let currentUser = null;
   let items = [];
   let editingId = null;
+  let pendingCostCenterAction = null;
 
-  // FUNÇÃO GLOBAL DE LOGOUT[cite: 1]
-  window.logout = async () => {
-    try { 
-      await logoutUser(); 
-    } catch (e) { 
-      alert("Erro ao sair: " + e.message); 
+  window.toggleSidebar = () => {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed');
+    localStorage.setItem('finweb_sidebar_collapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
+  };
+
+  function restoreSidebarState() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const collapsed = localStorage.getItem('finweb_sidebar_collapsed') === 'true';
+    sidebar.classList.toggle('collapsed', collapsed);
+  }
+
+
+  const PRESETS = ['#22c55e','#06b6d4','#8b5cf6','#f59e0b','#ef4444','#14b8a6','#3b82f6','#a855f7'];
+
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  function escapeHtml(value = '') {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function normalizeText(value) {
+    return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function typeLabel(type) {
+    return {
+      personal: 'Pessoal',
+      business: 'Negócio',
+      project: 'Projeto',
+      family: 'Família',
+      other: 'Outro'
+    }[type] || type || 'Outro';
+  }
+
+  function typeBadge(type) {
+    return `badge badge-${type || 'other'}`;
+  }
+
+  function initials(name = '') {
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return 'CC';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  function updateTableCount(visible, total) {
+    const el = document.getElementById('tableCount');
+    if (!el) return;
+    if (visible === total) el.textContent = `Mostrando ${visible} centro${visible === 1 ? '' : 's'}`;
+    else el.textContent = `Mostrando ${visible} de ${total} centros`;
+  }
+
+  function getFilteredItems() {
+    const search = normalizeText(document.getElementById('filterDescription')?.value || '');
+    const type = document.getElementById('filterType')?.value || 'all';
+    const status = document.getElementById('filterStatus')?.value || 'all';
+
+    return items.filter(item => {
+      const searchable = normalizeText(`${item.name || ''} ${item.code || ''} ${item.description || ''}`);
+      const matchSearch = !search || searchable.includes(search);
+      const matchType = type === 'all' || item.type === type;
+      const matchStatus = status === 'all'
+        || (status === 'active' && item.is_active !== false)
+        || (status === 'inactive' && item.is_active === false);
+      return matchSearch && matchType && matchStatus;
+    });
+  }
+
+  function updateStats() {
+    const total = items.length;
+    const active = items.filter(i => i.is_active !== false).length;
+    const inactive = total - active;
+    const types = new Set(items.map(i => i.type).filter(Boolean)).size;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statActive').textContent = active;
+    document.getElementById('statInactive').textContent = inactive;
+    document.getElementById('statTypes').textContent = types;
+  }
+
+  function renderList(list = getFilteredItems()) {
+    const body = document.getElementById('listBody');
+    if (!body) return;
+
+    if (!list.length) {
+      body.innerHTML = '<div class="empty"><div class="icon">🏢</div>Nenhum centro de custo encontrado.</div>';
+      updateTableCount(0, items.length);
+      return;
     }
+
+    body.innerHTML = list.map(item => {
+      const color = item.color || '#06b6d4';
+      const safeName = escapeHtml(item.name || 'Sem nome');
+      const safeCode = escapeHtml(item.code || 'Sem código');
+      const safeDesc = escapeHtml(item.description || 'Sem descrição informada');
+      const safeType = typeLabel(item.type);
+      const isActive = item.is_active !== false;
+
+      return `
+        <div class="cc-row" style="--row-color:${color}">
+          <div class="cc-info">
+            <div class="cc-dot"></div>
+            <div class="cc-avatar">${initials(item.name)}</div>
+            <div class="cc-text">
+              <div class="cc-name" title="${safeName}">${safeName}</div>
+              <div class="cc-meta"><span>Código: ${safeCode}</span></div>
+              <div class="cc-desc" title="${safeDesc}">${safeDesc}</div>
+            </div>
+          </div>
+          <div><span class="${typeBadge(item.type)}">${safeType}</span></div>
+          <div><span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">${isActive ? 'Ativo' : 'Inativo'}</span></div>
+          <div class="cc-actions">
+            <button class="action-menu-btn" onclick="openActionMenu(event, '${item.id}', '${String(item.name || '').replace(/'/g, "\\'")}')" title="Ações">...</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateTableCount(list.length, items.length);
+  }
+
+  window.applyFilters = () => renderList();
+
+  window.clearFilters = () => {
+    document.getElementById('filterDescription').value = '';
+    document.getElementById('filterType').value = 'all';
+    document.getElementById('filterStatus').value = 'all';
+    renderList(items);
   };
 
   async function loadData() {
@@ -181,97 +699,294 @@
         eq: { user_id: currentUser.id },
         order: { column: 'name', asc: true }
       });
+      updateStats();
       renderList();
     } catch (e) {
-      console.error("Erro ao carregar dados:", e);
+      console.error('Erro ao carregar dados:', e);
+      toast('Erro ao carregar centros de custo.', 'error');
     }
   }
 
-  function renderList() {
-    const body = document.getElementById('listBody');
-    if (!items.length) {
-      body.innerHTML = '<div class="empty" style="padding: 40px; text-align: center; color: var(--muted);">Nenhum centro de custo cadastrado.</div>';
-      return;
-    }
-
-    body.innerHTML = items.map(item => `
-      <div class="row-item">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 10px; height: 10px; border-radius: 50%; background: ${item.color}"></div>
-          <div>
-            <div style="font-weight: 500;">${item.name}</div>
-            <div style="font-size: 11px; color: var(--muted);">${item.code || '--'}</div>
-          </div>
-        </div>
-        <div><span class="badge-${item.type}" style="padding: 4px 8px; border-radius: 6px; font-size: 11px;">${item.type}</span></div>
-        <div style="font-size: 13px;">${item.is_active ? '✅ Ativo' : '❌ Inativo'}</div>
-        <div style="font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.description || ''}</div>
-        <div style="text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
-          <button class="btn btn-ghost btn-sm" onclick="editItem('${item.id}')">✏️</button>
-          <button class="btn btn-ghost btn-sm" onclick="deleteItem('${item.id}', '${item.name}')" style="color:var(--danger)">🗑️</button>
-        </div>
-      </div>
+  window.renderPresets = (selected = '#06b6d4') => {
+    const wrap = document.getElementById('colorPresets');
+    const preview = document.getElementById('colorPreview');
+    if (preview) preview.style.background = selected;
+    if (!wrap) return;
+    wrap.innerHTML = PRESETS.map(color => `
+      <button type="button" class="color-preset ${color.toLowerCase() === String(selected).toLowerCase() ? 'selected' : ''}"
+              style="background:${color}"
+              onclick="selectColor('${color}')"
+              aria-label="Selecionar cor ${color}"></button>
     `).join('');
-  }
+  };
+
+  window.selectColor = (color) => {
+    document.getElementById('fColor').value = color;
+    renderPresets(color);
+  };
+
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'fColor') renderPresets(e.target.value);
+  });
 
   window.openModal = (item = null) => {
     editingId = item?.id || null;
-    document.getElementById('modalTitle').textContent = item ? 'Editar Centro' : 'Novo Centro de Custo';
+    document.getElementById('modalTitle').textContent = item ? 'Editar Centro de Custo' : 'Novo Centro de Custo';
     document.getElementById('fName').value = item?.name || '';
     document.getElementById('fCode').value = item?.code || '';
     document.getElementById('fDescription').value = item?.description || '';
     document.getElementById('fType').value = item?.type || 'personal';
-    document.getElementById('fActive').value = item ? String(item.is_active) : 'true';
+    document.getElementById('fActive').value = item ? String(item.is_active !== false) : 'true';
     document.getElementById('fColor').value = item?.color || '#06b6d4';
+    renderPresets(item?.color || '#06b6d4');
     document.getElementById('modalOverlay').classList.add('open');
   };
 
-  window.closeModal = () => document.getElementById('modalOverlay').classList.remove('open');
+  window.closeModal = () => {
+    document.getElementById('modalOverlay').classList.remove('open');
+    editingId = null;
+  };
+
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  });
 
   window.editItem = (id) => {
     const item = items.find(i => i.id === id);
     if (item) openModal(item);
   };
 
-  window.saveCostCenter = async () => {
-    const payload = {
-      name: document.getElementById('fName').value,
-      code: document.getElementById('fCode').value,
-      description: document.getElementById('fDescription').value,
-      type: document.getElementById('fType').value,
-      is_active: document.getElementById('fActive').value === 'true',
-      color: document.getElementById('fColor').value,
-      user_id: currentUser.id,
-      updated_at: new Date().toISOString()
-    };
+  async function countCostCenterTransactions(costCenterId) {
+    const transactions = await db.select('transactions', {
+      eq: { user_id: currentUser.id, cost_center_id: costCenterId }
+    });
+    return Array.isArray(transactions) ? transactions.length : 0;
+  }
+
+  function getAlternativeCostCenters(item) {
+    return items
+      .filter(cc => cc.id !== item.id && cc.is_active !== false)
+      .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR'));
+  }
+
+  async function openTransferModal(item, actionKind, transactionCount) {
+    const options = getAlternativeCostCenters(item);
+    const select = document.getElementById('transferCostCenterId');
+    const btn = document.getElementById('btnTransfer');
+
+    pendingCostCenterAction = { item, actionKind };
+
+    document.getElementById('transferModalTitle').textContent =
+      actionKind === 'delete' ? 'Transferir antes de excluir' : 'Transferir antes de inativar';
+
+    document.getElementById('transferWarningText').innerHTML = `
+      O centro de custo <strong>${escapeHtml(item.name)}</strong> possui <strong>${transactionCount}</strong> lançamento${transactionCount === 1 ? '' : 's'} vinculado${transactionCount === 1 ? '' : 's'}.
+      Para preservar a integridade dos dados, transfira esses lançamentos para outro centro de custo ativo antes de continuar.
+    `;
+
+    if (!options.length) {
+      select.innerHTML = '<option value="">Nenhum centro de custo ativo disponível</option>';
+      btn.disabled = true;
+      toast('❌ Cadastre ou ative outro centro de custo antes de continuar.', 'error');
+    } else {
+      select.innerHTML = '<option value="">— Selecione —</option>' + options.map(cc =>
+        `<option value="${cc.id}">${escapeHtml(cc.name || 'Sem nome')}</option>`
+      ).join('');
+      btn.disabled = false;
+    }
+
+    document.getElementById('transferModalOverlay').classList.add('open');
+  }
+
+  window.closeTransferModal = () => {
+    document.getElementById('transferModalOverlay').classList.remove('open');
+    pendingCostCenterAction = null;
+  };
+
+  document.getElementById('transferModalOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('transferModalOverlay')) closeTransferModal();
+  });
+
+  window.transferAndApplyCostCenterAction = async () => {
+    const targetId = document.getElementById('transferCostCenterId').value;
+    if (!pendingCostCenterAction || !targetId) return toast('❌ Selecione um centro de custo destino.', 'error');
+
+    const { item, actionKind } = pendingCostCenterAction;
+    if (targetId === item.id) return toast('❌ Selecione um centro de custo diferente da origem.', 'error');
+
+    const targetCostCenter = items.find(cc => cc.id === targetId);
+    if (!targetCostCenter || targetCostCenter.is_active === false) {
+      return toast('❌ Selecione um centro de custo ativo.', 'error');
+    }
+
+    const btn = document.getElementById('btnTransfer');
+    btn.disabled = true;
+    btn.textContent = 'Transferindo...';
+
+    let successMessage = '';
 
     try {
+      const transactions = await db.select('transactions', {
+        eq: { user_id: currentUser.id, cost_center_id: item.id }
+      });
+
+      for (const tx of transactions || []) {
+        await db.update('transactions', {
+          cost_center_id: targetId,
+          updated_at: new Date().toISOString()
+        }, tx.id);
+      }
+
+      if (actionKind === 'delete') {
+        await db.delete('cost_centers', item.id);
+        successMessage = '✅ Lançamentos transferidos e centro de custo excluído.';
+      } else {
+        await db.update('cost_centers', {
+          is_active: false,
+          updated_at: new Date().toISOString()
+        }, item.id);
+        successMessage = '✅ Lançamentos transferidos e centro de custo inativado.';
+      }
+
+      pendingCostCenterAction = null;
+      document.getElementById('transferModalOverlay')?.classList.remove('open');
+      document.getElementById('modalOverlay')?.classList.remove('open');
+      editingId = null;
+
+      toast(successMessage, 'success');
+      await loadData();
+    } catch (err) {
+      toast('❌ ' + (err?.message || 'Erro ao transferir lançamentos.'), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Transferir e continuar';
+    }
+  };
+
+  window.saveCostCenter = async () => {
+    const name = document.getElementById('fName').value.trim();
+    if (!name) return toast('❌ Informe o nome do centro de custo.', 'error');
+
+    const isActive = document.getElementById('fActive').value === 'true';
+    const currentItem = editingId ? items.find(i => i.id === editingId) : null;
+
+    const btn = document.getElementById('btnSave');
+    btn.disabled = true;
+
+    try {
+      if (editingId && currentItem && currentItem.is_active !== false && !isActive) {
+        const txCount = await countCostCenterTransactions(editingId);
+        if (txCount > 0) {
+          await openTransferModal(currentItem, 'inactivate', txCount);
+          return;
+        }
+      }
+
+      const payload = {
+        name,
+        code: document.getElementById('fCode').value.trim() || null,
+        description: document.getElementById('fDescription').value.trim() || null,
+        type: document.getElementById('fType').value,
+        is_active: isActive,
+        color: document.getElementById('fColor').value,
+        user_id: currentUser.id,
+        updated_at: new Date().toISOString()
+      };
+
       if (editingId) {
         await db.update('cost_centers', payload, editingId);
+        toast('✅ Centro de custo atualizado.');
       } else {
         await db.insert('cost_centers', payload);
+        toast('✅ Centro de custo criado.');
       }
+
       closeModal();
-      loadData();
-    } catch (e) { alert(e.message); }
+      await loadData();
+    } catch (e) {
+      toast('❌ ' + (e.message || 'Erro ao salvar.'), 'error');
+    } finally {
+      btn.disabled = false;
+    }
   };
 
   window.deleteItem = async (id, name) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return toast('❌ Centro de custo não encontrado.', 'error');
+
+    const txCount = await countCostCenterTransactions(id);
+    if (txCount > 0) {
+      await openTransferModal(item, 'delete', txCount);
+      return;
+    }
+
     if (!confirm(`Deseja realmente excluir o centro de custo "${name}"?`)) return;
+
     try {
       await db.delete('cost_centers', id);
-      loadData();
-    } catch (e) { alert('Erro ao excluir: ' + e.message); }
+      toast('✅ Centro de custo excluído.');
+      await loadData();
+    } catch (e) {
+      toast('❌ Erro ao excluir: ' + e.message, 'error');
+    }
+  };
+
+  window.openActionMenu = (event, id, name) => {
+    event.stopPropagation();
+    const menu = document.getElementById('globalActionMenu');
+    if (!menu) return;
+
+    menu.innerHTML = `
+      <button type="button" onclick="editItem('${id}'); closeActionMenu();">Alterar</button>
+      <button type="button" class="danger" onclick="deleteItem('${id}', '${String(name).replace(/'/g, "\\'")}'); closeActionMenu();">Excluir</button>
+    `;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    menu.classList.add('open');
+
+    const menuWidth = 150;
+    const menuHeight = 96;
+    let left = rect.right - menuWidth;
+    let top = rect.bottom + 8;
+
+    if (left < 8) left = 8;
+    if (top + menuHeight > window.innerHeight - 8) top = rect.top - menuHeight - 8;
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+  };
+
+  window.closeActionMenu = () => document.getElementById('globalActionMenu')?.classList.remove('open');
+
+  document.addEventListener('click', (event) => {
+    const menu = document.getElementById('globalActionMenu');
+    if (!menu) return;
+    if (!menu.contains(event.target) && !event.target.classList.contains('action-menu-btn')) closeActionMenu();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeActionMenu();
+  });
+
+  window.logout = async () => {
+    try { await logoutUser(); } catch (e) { alert('Erro ao sair: ' + e.message); }
   };
 
   (async () => {
-    initSupabase();
-    currentUser = await getCurrentUser();
-    if (!currentUser) {
-      window.location.href = '/public/login.html';
-      return;
+    try {
+      initSupabase();
+      currentUser = await getCurrentUser();
+      if (!currentUser) {
+        window.location.href = '/public/login.html';
+        return;
+      }
+      restoreSidebarState();
+      renderPresets('#06b6d4');
+      await loadData();
+    } catch (err) {
+      console.error('Erro inicial:', err);
+      alert(err.message);
     }
-    loadData();
   })();
 </script>
 </body>

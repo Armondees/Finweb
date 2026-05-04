@@ -4,56 +4,134 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contas - FinWeb</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:     #020617;
-      --card:   #0f172a;
+      --bg: #020617;
+      --card: #0f172a;
+      --card-soft: #111c31;
       --border: #1e293b;
-      --text:   #e2e8f0;
-      --muted:  #94a3b8;
-      --green:  #22c55e;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #22c55e;
       --green-dark: #16a34a;
-      --cyan:   #06b6d4;
+      --cyan: #06b6d4;
       --danger: #ef4444;
-      --yellow: #facc15;
       --purple: #8b5cf6;
-      --soft: rgba(255,255,255,0.03);
+      --shadow: 0 18px 45px rgba(0,0,0,0.22);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
-    body { display: flex; background: var(--bg); color: var(--text); min-height: 100vh; }
+    html, body { min-height: 100dvh; }
 
-    /* SIDEBAR */
-    .sidebar {
-      width: 220px; height: 100vh; position: sticky; top: 0;
-      background: var(--card); border-right: 1px solid var(--border);
-      padding: 24px 16px; display: flex; flex-direction: column;
+    body {
+      display: flex;
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,0.08), transparent 32%),
+        radial-gradient(circle at top right, rgba(6,182,212,0.05), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow: hidden;
     }
-    .logo { font-size: 20px; font-weight: 600; margin-bottom: 32px; padding: 0 8px; }
+
+    .sidebar {
+      width: 220px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.92);
+      border-right: 1px solid var(--border);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(12px);
+      transition: width .2s ease, padding .2s ease;
+      overflow-x: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: 72px;
+      padding: 20px 10px;
+    }
+
+    .sidebar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      padding: 0 8px;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+    }
     .logo span { color: var(--green); }
+
+    .sidebar-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: rgba(2,6,23,.55);
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      transition: all .18s ease;
+    }
+    .sidebar-toggle:hover {
+      color: var(--green);
+      border-color: rgba(34,197,94,.42);
+      background: rgba(34,197,94,.08);
+    }
+
     .menu { flex: 1; }
     .menu a {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px; margin-bottom: 4px; border-radius: 8px;
-      text-decoration: none; color: var(--muted); font-size: 14px;
-      transition: all 0.15s; cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 4px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      transition: all 0.18s ease;
+      cursor: pointer;
+      white-space: nowrap;
     }
-    .menu a:hover, .menu a.active { background: rgba(34,197,94,0.1); color: var(--green); }
-    .menu a.danger:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
-    .menu-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+    .menu a .menu-text { overflow: hidden; text-overflow: ellipsis; }
+    .sidebar.collapsed .logo { width: 0; padding: 0; }
+    .sidebar.collapsed .menu-label,
+    .sidebar.collapsed .menu a .menu-text { display: none; }
+    .sidebar.collapsed .menu a { justify-content: center; padding: 10px; gap: 0; }
+    .sidebar.collapsed .menu-divider { margin: 10px 8px; }
+    .menu a:hover, .menu a.active {
+      background: rgba(34,197,94,0.12);
+      color: var(--green);
+    }
+    .menu a.danger:hover {
+      background: rgba(239,68,68,0.1);
+      color: var(--danger);
+    }
 
-/* Estilos da Sidebar */
     .menu-label {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--muted);
       padding: 12px 12px 6px;
-      font-weight: 600;
+      font-weight: 700;
       opacity: 0.7;
-      display: block; /* Garante que fique em uma linha própria */
+      display: block;
     }
 
     .menu-divider {
@@ -63,199 +141,312 @@
       opacity: 0.5;
     }
 
-    /* MAIN */
-    .main { flex: 1; padding: 28px 32px; overflow-y: auto; }
+    .main.accounts-page {
+      flex: 1;
+      height: 100dvh;
+      padding: 18px 24px max(24px, env(safe-area-inset-bottom));
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
 
     .page-header {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
-    }
-    .page-title h2 { font-size: 24px; font-weight: 700; display:flex; align-items:center; gap:10px; }
-    .page-title p { color: var(--muted); font-size: 13px; margin-top: 6px; }
-
-    /* BOTÃO */
-    .btn {
-      padding: 9px 18px; border-radius: 8px; border: none;
-      font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.2s;
-    }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary { background: linear-gradient(135deg, var(--green), var(--green-dark)); color: white; box-shadow: 0 10px 24px rgba(34,197,94,0.22); }
-    .btn-primary:hover { opacity: 1; transform: translateY(-1px); }
-    .btn-danger  { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
-    .btn-ghost   { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* RESUMO */
-    .stats {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
-      gap: 16px; margin-bottom: 28px;
-    }
-    .stat-card {
-      background: linear-gradient(135deg, rgba(15,23,42,0.96), rgba(15,23,42,0.72)); border: 1px solid var(--border);
-      border-radius: 14px; padding: 18px; display:flex; align-items:center; gap:14px; min-height:92px;
-    }
-    .stat-icon { width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; background:rgba(34,197,94,0.12); }
-    .stat-card h3 { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight:500; }
-    .stat-card .value { font-size: 22px; font-weight: 700; }
-    .stat-card .value.green  { color: var(--green); }
-    .stat-card .value.cyan   { color: var(--cyan); }
-
-
-
-    /* FILTROS */
-    .filters {
-      display: grid;
-      grid-template-columns: minmax(220px, 1.5fr) 150px 150px 150px auto;
-      gap: 12px;
-      margin-bottom: 22px;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
+      gap: 18px;
+      margin-bottom: 12px;
+      flex: 0 0 auto;
     }
-    .filter-field { position: relative; }
-    .filter-field input,
-    .filter-field select {
-      width: 100%; height: 44px; padding: 0 14px;
-      border: 1px solid var(--border); border-radius: 10px;
-      background: rgba(15,23,42,0.9); color: var(--text); outline: none;
+    .page-title h2 {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      margin-bottom: 4px;
     }
-    .filter-field input:focus,
-    .filter-field select:focus { border-color: var(--green); }
-    .filter-field.search input { padding-right: 42px; }
-    .filter-field.search span { position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--muted); }
+    .page-title p { font-size: 12px; color: var(--muted); }
 
-    /* LISTA EM CARDS */
-    .accounts-list { display: flex; flex-direction: column; }
-    .account-card {
+    .btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      color: var(--text);
+      background: #334155;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+    .btn:hover { transform: translateY(-1px); opacity: 0.95; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      color: white;
+      box-shadow: 0 10px 24px rgba(34,197,94,0.22);
+    }
+    .btn-secondary, .btn-ghost {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-danger {
+      background: rgba(239,68,68,0.12);
+      color: var(--danger);
+      border-color: rgba(239,68,68,0.22);
+    }
+    .btn.full { width: 100%; }
+
+    .card {
+      background: linear-gradient(145deg, rgba(15,23,42,0.98), rgba(10,17,32,0.98));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .accounts-layout {
+      flex: 1;
+      min-height: 0;
       display: grid;
-      grid-template-columns: 1.5fr 1fr 120px 140px;
-      gap: 20px; align-items: center;
-      padding: 22px 24px; border-bottom: 1px solid var(--border);
-      background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(15,23,42,0.72));
-      transition: background .15s, transform .15s;
-    }
-    .account-card:last-child { border-bottom: none; }
-    .account-card:hover { background: rgba(255,255,255,0.035); }
-    .account-main { display:flex; gap:16px; align-items:center; min-width:0; }
-    .account-icon { width:58px; height:58px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:26px; background:rgba(6,182,212,0.12); border:1px solid rgba(255,255,255,0.04); }
-    .account-info h4 { font-size:16px; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .account-meta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:var(--muted); font-size:13px; }
-    .account-label { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
-    .account-balance { font-size: 20px; font-weight: 700; color: var(--green); }
-    .account-actions { display:flex; gap:10px; justify-content:flex-end; }
-    .icon-btn { width:42px; height:42px; display:flex; align-items:center; justify-content:center; padding:0; }
-
-    /* DRAWER */
-    .modal-overlay { justify-content: flex-end; align-items: stretch; background: rgba(2,6,23,.72); backdrop-filter: blur(2px); }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      max-width: 430px; height: 100vh; border-radius: 0; border-top: 0; border-right: 0; border-bottom: 0;
-      padding: 30px 28px; overflow-y: auto; animation: slideIn .2s ease-out;
-    }
-    @keyframes slideIn { from { transform: translateX(30px); opacity:.7; } to { transform: translateX(0); opacity:1; } }
-    .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
-    .modal-head h3 { margin:0; font-size:20px; }
-    .modal-close { background:transparent; border:0; color:var(--muted); font-size:26px; cursor:pointer; }
-    .type-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .type-option { position:relative; }
-    .type-option input { position:absolute; opacity:0; pointer-events:none; }
-    .type-option label { display:flex; align-items:center; gap:10px; height:58px; padding:0 14px; border:1px solid var(--border); border-radius:10px; background:rgba(15,23,42,.75); cursor:pointer; color:var(--text); font-size:14px; text-transform:none; letter-spacing:0; }
-    .type-option input:checked + label { border-color:var(--yellow); box-shadow:0 0 0 1px rgba(250,204,21,.35) inset; }
-    .money-input { display:flex; align-items:center; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--bg); }
-    .money-input span { padding:0 12px; color:var(--text); border-right:1px solid var(--border); }
-    .money-input input { border:0; border-radius:0; }
-
-    .menu a.active { background: rgba(34,197,94,0.12); color: var(--green); }
-
-    @media (max-width: 980px) {
-      .filters { grid-template-columns: 1fr 1fr; }
-      .account-card { grid-template-columns: 1fr; gap:14px; }
-      .account-actions { justify-content:flex-start; }
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 16px;
+      align-items: stretch;
     }
 
-    /* TABELA */
-    .table-wrap {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; overflow: hidden;
+    .accounts-side {
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
-    .table-header {
-      padding: 16px 20px; border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .table-header span { font-size: 14px; font-weight: 500; }
 
-    table { width: 100%; border-collapse: collapse; }
-    thead th {
-      padding: 12px 20px; text-align: left;
-      font-size: 11px; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.05em;
+    .side-card {
+      padding: 14px 16px;
+      border-radius: 15px;
+    }
+    .side-card-title {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(148,163,184,.12);
+    }
+    .side-card-title span { font-size: 13px; font-weight: 700; color: var(--text); }
+    .side-card-title small { font-size: 10.5px; color: var(--muted); line-height: 1.35; }
+
+    .summary-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(148,163,184,.08);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .summary-line:last-child { border-bottom: none; }
+    .summary-line strong { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .summary-line.balance strong { color: var(--green); font-size: 14px; }
+    .summary-line.cyan strong { color: var(--cyan); }
+
+    .filter-field { margin-bottom: 9px; }
+    .filter-field label, .modal label {
+      font-size: 9.5px;
+      color: #8aa0bd;
+      text-transform: uppercase;
+      letter-spacing: .045em;
+      font-weight: 700;
+      margin-bottom: 5px;
+      display: block;
+    }
+    input, select {
+      width: 100%;
+      height: 34px;
+      padding: 7px 9px;
+      background: rgba(2,6,23,0.88);
+      border: 1px solid var(--border);
+      color: white;
+      border-radius: 8px;
+      font-size: 12px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    input:focus, select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.13);
+    }
+    input::placeholder { color: #64748b; }
+
+    .accounts-grid-card {
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: visible;
+      border-radius: 15px;
+    }
+    .grid-topbar {
+      flex: 0 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 11px 14px;
       border-bottom: 1px solid var(--border);
+      background: rgba(2,6,23,.25);
     }
-    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(255,255,255,0.02); }
-    tbody td { padding: 14px 20px; font-size: 14px; }
+    .grid-topbar strong { font-size: 12.5px; color: var(--text); }
+    .grid-topbar small { display: block; margin-top: 3px; font-size: 10.5px; color: var(--muted); }
+
+    .accounts-list-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-gutter: stable;
+    }
+    .account-row {
+      display: grid;
+      grid-template-columns: minmax(260px, 1.5fr) 130px 115px 74px;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 14px;
+      border-bottom: 1px solid rgba(30,41,59,0.9);
+      transition: background .18s ease;
+    }
+    .account-row:nth-child(even) { background: rgba(255,255,255,0.012); }
+    .account-row:hover { background: rgba(34,197,94,0.04); }
+    .account-main { display: flex; gap: 10px; align-items: center; min-width: 0; }
+    .account-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: rgba(6,182,212,0.10);
+      border: 1px solid rgba(255,255,255,0.05);
+      font-size: 18px;
+      flex: 0 0 auto;
+    }
+    .account-title { min-width: 0; }
+    .account-name {
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.25;
+      color: #e5edf8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .account-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+      margin-top: 4px;
+      font-size: 10.5px;
+      color: rgba(148,163,184,0.78);
+      line-height: 1.25;
+    }
+    .account-meta span + span::before {
+      content: '•';
+      margin-right: 5px;
+      color: rgba(148,163,184,0.45);
+    }
+    .account-balance { text-align: right; font-size: 12.5px; font-weight: 700; }
+    .account-actions { text-align: right; position: relative; }
 
     .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 11px; font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      white-space: nowrap;
     }
-    .badge-checking    { background: rgba(6,182,212,0.15);  color: var(--cyan); }
-    .badge-savings     { background: rgba(34,197,94,0.15);  color: var(--green); }
-    .badge-investment  { background: rgba(168,85,247,0.15); color: #a855f7; }
-    .badge-active      { background: rgba(34,197,94,0.12);  color: var(--green); }
-    .badge-inactive    { background: rgba(239,68,68,0.12);  color: var(--danger); }
+    .badge-checking { background: rgba(6,182,212,0.13); color: var(--cyan); }
+    .badge-savings { background: rgba(34,197,94,0.13); color: var(--green); }
+    .badge-investment { background: rgba(139,92,246,0.13); color: var(--purple); }
+    .badge-active { background: rgba(34,197,94,0.12); color: var(--green); }
+    .badge-inactive { background: rgba(239,68,68,0.12); color: var(--danger); }
+    .badge-main { background: rgba(34,197,94,0.12); color: var(--green); }
 
-    .actions { display: flex; gap: 8px; }
+    .action-menu-btn {
+      width: 34px;
+      height: 30px;
+      border-radius: 9px;
+      border: 1px solid rgba(148,163,184,0.13);
+      background: rgba(15,23,42,0.72);
+      color: rgba(226,232,240,0.82);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 700;
+      transition: all .18s ease;
+    }
+    .action-menu-btn:hover {
+      color: white;
+      border-color: rgba(34,197,94,0.48);
+      background: rgba(34,197,94,0.08);
+    }
+    .global-action-menu {
+      display: none;
+      position: fixed;
+      min-width: 150px;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #0b1220;
+      box-shadow: 0 18px 45px rgba(0,0,0,.42);
+      z-index: 9999;
+    }
+    .global-action-menu.open { display: block; }
+    .global-action-menu button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      padding: 9px 10px;
+      border-radius: 9px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .global-action-menu button:hover { background: rgba(34,197,94,0.10); }
+    .global-action-menu button.danger { color: var(--danger); }
+    .global-action-menu button.danger:hover { background: rgba(239,68,68,0.10); }
+
+    .list-footer {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px max(14px, env(safe-area-inset-bottom));
+      min-height: 42px;
+      border-top: 1px solid var(--border);
+      background: rgba(15,23,42,0.96);
+      color: var(--muted);
+      font-size: 11.5px;
+    }
 
     .empty {
-      text-align: center; padding: 48px 20px; color: var(--muted); font-size: 14px;
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--muted);
+      font-size: 13px;
     }
     .empty .icon { font-size: 36px; margin-bottom: 12px; }
 
-    /* MODAL */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7); z-index: 100;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 28px; width: 100%; max-width: 480px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    }
-    .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
-
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
-    .form-group input,
-    .form-group select {
-      width: 100%; padding: 10px 12px;
-      border-radius: 8px; border: 1px solid var(--border);
-      background: var(--bg); color: var(--text);
-      font-size: 14px; outline: none; transition: border-color 0.2s;
-    }
-    .form-group input:focus,
-    .form-group select:focus { border-color: var(--green); }
-    .form-group select option { background: var(--card); }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-
-    .toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px 18px;
-      font-size: 13px; z-index: 200;
-      transform: translateY(80px); opacity: 0;
-      transition: all 0.3s;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { border-color: var(--green); color: var(--green); }
-    .toast.error   { border-color: var(--danger); color: var(--danger); }
-
-
-    /* Ajuste final: modal central compacto, padronizado com transações */
+    /* MODAL igual padrão da tela de transações */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -265,231 +456,214 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      backdrop-filter: none;
     }
     .modal-overlay.open { display: flex; }
     .modal {
       background: var(--card);
-      padding: 24px;
+      padding: 28px;
       border-radius: 16px;
       width: 100%;
       max-width: 500px;
-      height: auto;
-      max-height: calc(100vh - 40px);
-      overflow-y: auto;
       border: 1px solid var(--border);
-      box-shadow: 0 18px 45px rgba(0,0,0,0.22);
+      box-shadow: var(--shadow);
     }
-    .modal-head { margin-bottom: 18px; }
-    .modal-head h3 { font-size: 18px; }
-    .form-group { margin-bottom: 14px; }
-    .form-row.compact { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .modal h3 {
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group input, .form-group select {
+      height: 38px;
+      padding: 9px 11px;
+      font-size: 13px;
+      border-radius: 10px;
+    }
     .main-account-flag {
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      padding: 12px;
+      padding: 10px 12px;
       border: 1px solid var(--border);
       border-radius: 10px;
       background: rgba(2,6,23,0.45);
-      margin-top: 4px;
+      min-height: 38px;
     }
-    .main-account-flag input { width: auto; margin-top: 2px; accent-color: var(--green); }
-    .main-account-flag strong { display: block; font-size: 13px; color: var(--text); margin-bottom: 2px; }
-    .main-account-flag span { display: block; font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .main-account-flag input { width: auto; height: auto; margin-top: 2px; accent-color: var(--green); }
+    .main-account-flag strong { display: block; font-size: 12px; color: var(--text); margin-bottom: 2px; }
+    .main-account-flag span { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
+    .toast {
+      position: fixed;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      right: 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 13px;
+      z-index: 200;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--green); color: var(--green); }
+    .toast.error { border-color: var(--danger); color: var(--danger); }
+
+    @media (max-width: 1100px) {
+      body { overflow: auto; }
+      .main.accounts-page { height: auto; min-height: 100dvh; overflow: visible; }
+      .accounts-layout { grid-template-columns: 1fr; }
+      .accounts-side { height: auto; }
+      .accounts-grid-card { min-height: 560px; }
+    }
     @media (max-width: 768px) {
+      body { display: block; }
       .sidebar { display: none; }
-      .main { padding: 20px 16px; }
-    }
-
-
-    /* Ajuste visual da lista de contas: fontes menores, modernas e sutis */
-    .account-card {
-      padding: 16px 20px;
-      gap: 16px;
-    }
-
-    .account-card:hover {
-      background: rgba(255,255,255,0.04);
-      transform: translateY(-1px);
-    }
-
-    .account-main {
-      gap: 12px;
-    }
-
-    .account-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      font-size: 22px;
-      background: rgba(6,182,212,0.10);
-    }
-
-    .account-info h4 {
-      font-size: 15px;
-      font-weight: 500;
-      line-height: 1.25;
-      margin-bottom: 4px;
-      letter-spacing: -0.01em;
-    }
-
-    .account-meta {
-      font-size: 12px;
-      gap: 6px;
-      opacity: 0.85;
-      line-height: 1.35;
-    }
-
-    .account-label {
-      font-size: 11px;
-      margin-bottom: 4px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      opacity: 0.82;
-    }
-
-    .account-balance {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-
-    .badge {
-      font-size: 10px;
-      padding: 2px 8px;
-      font-weight: 500;
-      opacity: 0.9;
-    }
-
-    .account-actions {
-      gap: 8px;
-    }
-
-    .icon-btn {
-      width: 36px;
-      height: 36px;
-      font-size: 14px;
-      opacity: 0.85;
-    }
-
-    .icon-btn:hover {
-      opacity: 1;
-      transform: translateY(-1px);
+      .main.accounts-page { padding: 18px 14px; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .account-row { grid-template-columns: minmax(220px,1fr) 110px 90px 60px; min-width: 640px; }
+      .accounts-list-scroll { overflow-x: auto; }
     }
   </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="logo">Fin<span>Web</span></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="logo">Fin<span>Web</span></div>
+    <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" title="Recolher/expandir menu">☰</button>
+  </div>
 
   <nav class="menu">
     <div class="menu-label">Movimentações</div>
-    <a href="/public/dashboard.html">📊 Dashboard</a>
-    <a href="/public/transactions.html">💸 Transações</a>
-    <a href="/public/cards.html">💳 Cartões</a>
-    
+    <a href="/public/dashboard.html" id="link-dash" title="Dashboard">📊 <span class="menu-text">Dashboard</span></a>
+    <a href="/public/transactions.html" id="link-tx" title="Transações">💸 <span class="menu-text">Transações</span></a>
+    <a href="/public/payables_receivables.html?type=expense" title="Pagar/Receber">📅 <span class="menu-text">Pagar/Receber</span></a>
+    <a href="/public/cards.html" title="Cartões">💳 <span class="menu-text">Cartões</span></a>
+
     <hr class="menu-divider">
 
     <div class="menu-label">Demonstrativos</div>
-    <a href="/public/reports.html">📈 Relatórios</a>
-    <a href="#">🌊 Fluxo de Caixa</a>
-    
+    <a href="/public/reports.html" title="Relatórios">📈 <span class="menu-text">Relatórios</span></a>
+    <a href="#" title="Fluxo de Caixa">🌊 <span class="menu-text">Fluxo de Caixa</span></a>
+
     <hr class="menu-divider">
 
     <div class="menu-label">Cadastro</div>
-    <a href="/public/accounts.html" class="active">🏦 Contas</a>
-    <a href="/public/categories.html">🏷️ Categorias</a>
-    <a href="#">🏢 Centro de Custos</a>
-    <a href="#">🏷️ Tags</a>
+    <a href="/public/accounts.html" class="active" title="Contas">🏦 <span class="menu-text">Contas</span></a>
+    <a href="/public/categories.html" title="Categorias">🏷️ <span class="menu-text">Categorias</span></a>
+    <a href="/public/cost_centers.html" title="Centro de Custos">🏢 <span class="menu-text">Centro de Custos</span></a>
+    <a href="/public/Tags.html" title="Tags">🏷️ <span class="menu-text">Tags</span></a>
 
     <hr class="menu-divider">
-    <a onclick="logout()" class="danger" style="cursor:pointer">🚪 Sair</a>
+    <a onclick="logout()" class="danger" style="cursor:pointer" title="Sair">🚪 <span class="menu-text">Sair</span></a>
   </nav>
 </div>
 
-<!-- MAIN -->
-<div class="main">
+<div class="main accounts-page">
   <div class="page-header">
     <div class="page-title">
       <h2>🏦 Contas</h2>
-      <p>Gerencie suas contas bancárias e carteiras</p>
+      <p>Gerencie contas bancárias, carteiras e saldos iniciais.</p>
     </div>
     <button class="btn btn-primary" onclick="openModal()">+ Nova Conta</button>
   </div>
 
-  <!-- RESUMO -->
-  <div class="stats">
-    <div class="stat-card"><div class="stat-icon">👛</div><div>
-      <h3>Saldo Total</h3>
-      <div class="value green" id="totalBalance">—</div>
-    </div></div>
-    <div class="stat-card"><div class="stat-icon">🏦</div><div>
-      <h3>Contas Ativas</h3>
-      <div class="value cyan" id="totalAccounts">—</div>
-    </div></div>
-    <div class="stat-card"><div class="stat-icon">📈</div><div>
-      <h3>Corrente</h3>
-      <div class="value green" id="checkingBalance">—</div>
-    </div></div>
-    <div class="stat-card"><div class="stat-icon">💜</div><div>
-      <h3>Poupança</h3>
-      <div class="value cyan" id="savingsBalance">—</div>
-    </div></div>
-  </div>
+  <div class="accounts-layout">
+    <aside class="accounts-side">
+      <section class="card side-card">
+        <div class="side-card-title">
+          <span>Resumo das contas</span>
+          <small>Saldo atual consolidado das contas ativas.</small>
+        </div>
+        <div class="summary-line balance">
+          <span>Saldo total</span>
+          <strong id="totalBalance">—</strong>
+        </div>
+        <div class="summary-line cyan">
+          <span>Contas ativas</span>
+          <strong id="totalAccounts">—</strong>
+        </div>
+        <div class="summary-line">
+          <span>Corrente</span>
+          <strong id="checkingBalance">—</strong>
+        </div>
+        <div class="summary-line">
+          <span>Caixa</span>
+          <strong id="cashBalance">—</strong>
+        </div>
+        <div class="summary-line">
+          <span>Investimento</span>
+          <strong id="investmentBalance">—</strong>
+        </div>
+      </section>
 
-  <!-- FILTROS -->
-  <div class="filters">
-    <div class="filter-field search">
-      <input type="text" id="filterSearch" placeholder="Buscar conta..." oninput="applyFilters()">
-      <span>🔎</span>
-    </div>
-    <div class="filter-field">
-      <select id="filterType" onchange="applyFilters()">
-        <option value="">Tipo</option>
-        <option value="checking">Corrente</option>
-        <option value="savings">Poupança</option>
-        <option value="investment">Investimento</option>
-      </select>
-    </div>
-    <div class="filter-field">
-      <select id="filterBank" onchange="applyFilters()">
-        <option value="">Banco</option>
-      </select>
-    </div>
-    <div class="filter-field">
-      <select id="filterStatus" onchange="applyFilters()">
-        <option value="">Status</option>
-        <option value="active">Ativa</option>
-        <option value="inactive">Inativa</option>
-      </select>
-    </div>
-    <button class="btn btn-ghost" onclick="clearFilters()">↻ Limpar</button>
-  </div>
+      <section class="card side-card">
+        <div class="side-card-title">
+          <span>Filtros</span>
+          <small>Refine a lista sem alterar os dados cadastrados.</small>
+        </div>
+        <div class="filter-field">
+          <label>Descrição</label>
+          <input type="text" id="filterSearch" placeholder="Buscar conta, banco ou número..." oninput="applyFilters()">
+        </div>
+        <div class="filter-field">
+          <label>Tipo</label>
+          <select id="filterType" onchange="applyFilters()">
+            <option value="">Todos</option>
+            <option value="checking">Corrente</option>
+            <option value="savings">Caixa</option>
+            <option value="investment">Investimento</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>Banco</label>
+          <select id="filterBank" onchange="applyFilters()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>Status</label>
+          <select id="filterStatus" onchange="applyFilters()">
+            <option value="">Todos</option>
+            <option value="active">Ativa</option>
+            <option value="inactive">Inativa</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-secondary full" onclick="clearFilters()">Limpar filtros</button>
+      </section>
+    </aside>
 
-  <!-- LISTA -->
-  <div class="table-wrap">
-    <div class="table-header">
-      <span>Suas Contas</span>
-    </div>
-    <div id="tableContent">
-      <div class="empty"><div class="icon">⏳</div>Carregando...</div>
-    </div>
+    <section class="card accounts-grid-card">
+      <div class="grid-topbar">
+        <div>
+          <strong>Suas contas</strong>
+          <small id="accountListLabel">Lista de contas cadastradas com saldo atual</small>
+        </div>
+      </div>
+
+      <div class="accounts-list-scroll" id="tableContent">
+        <div class="empty"><div class="icon">⏳</div>Carregando...</div>
+      </div>
+
+      <div class="list-footer">
+        <span id="tableCount">Mostrando 0 contas</span>
+        <span>Ações disponíveis no menu da linha</span>
+      </div>
+    </section>
   </div>
 </div>
 
-<!-- MODAL CRIAR/EDITAR -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <div class="modal-head">
-      <h3 id="modalTitle">Nova Conta</h3>
-      <button class="modal-close" onclick="closeModal()" aria-label="Fechar">×</button>
-    </div>
+    <h3 id="modalTitle">Nova Conta</h3>
 
-    <div class="form-row compact">
+    <div class="form-row">
       <div class="form-group">
         <label>Nome da Conta *</label>
         <input type="text" id="fName" placeholder="Ex.: Conta Principal">
@@ -498,13 +672,13 @@
         <label>Tipo *</label>
         <select id="fType">
           <option value="checking">Corrente</option>
-          <option value="savings">Poupança</option>
+          <option value="savings">Caixa</option>
           <option value="investment">Investimento</option>
         </select>
       </div>
     </div>
 
-    <div class="form-row compact">
+    <div class="form-row">
       <div class="form-group">
         <label>Banco</label>
         <input type="text" id="fBank" placeholder="Ex.: Nubank, CEF">
@@ -515,28 +689,36 @@
       </div>
     </div>
 
-    <div class="form-row compact">
+    <div class="form-row">
       <div class="form-group">
         <label>Saldo Inicial</label>
-        <div class="money-input"><span>R$</span><input type="number" id="fBalance" placeholder="0,00" step="0.01" min="0"></div>
+        <input type="number" id="fBalance" placeholder="0,00" step="0.01" min="0">
       </div>
       <div class="form-group">
-        <label>Conta Principal</label>
-        <label class="main-account-flag" for="fIsMain">
-          <input type="checkbox" id="fIsMain">
-          <span><strong>Definir como principal</strong>Usada como padrão em lançamentos e filtros.</span>
-        </label>
+        <label>Status da conta</label>
+        <select id="fStatus">
+          <option value="true">Ativa</option>
+          <option value="false">Inativa</option>
+        </select>
       </div>
     </div>
 
+    <div class="form-group">
+      <label>Conta Principal</label>
+      <label class="main-account-flag" for="fIsMain">
+        <input type="checkbox" id="fIsMain">
+        <span><strong>Definir como principal</strong>Usada como padrão em lançamentos e filtros.</span>
+      </label>
+    </div>
+
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="btnSave" onclick="saveAccount()">Salvar Conta</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
+<div class="global-action-menu" id="globalActionMenu"></div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -548,7 +730,21 @@
   let editingId   = null;
   let allAccounts = [];
 
-  // ── Helpers ──────────────────────────────────────
+
+  window.toggleSidebar = () => {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed');
+    localStorage.setItem('finweb_sidebar_collapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
+  };
+
+  function restoreSidebarState() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const collapsed = localStorage.getItem('finweb_sidebar_collapsed') === 'true';
+    sidebar.classList.toggle('collapsed', collapsed);
+  }
+
   function toast(msg, type = 'success') {
     const el = document.getElementById('toast');
     el.textContent = msg;
@@ -556,63 +752,85 @@
     setTimeout(() => el.classList.remove('show'), 3000);
   }
 
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   function typeLabel(t) {
-    return { checking: 'Corrente', savings: 'Poupança', investment: 'Investimento' }[t] || t;
+    return { checking: 'Corrente', savings: 'Caixa', investment: 'Investimento' }[t] || t;
   }
   function typeIcon(t) {
-    return { checking: '🏦', savings: '🐷', investment: '📈' }[t] || '🏦';
+    return { checking: '🏦', savings: '💵', investment: '📈' }[t] || '🏦';
   }
   function typeBadge(t) {
     return { checking: 'badge-checking', savings: 'badge-savings', investment: 'badge-investment' }[t] || '';
   }
 
-  // ── Render ────────────────────────────────────────
+  function getAccountBalance(account) {
+    const value = account?.calculated_balance ?? account?.current_balance ?? account?.initial_balance ?? 0;
+    return Number(value) || 0;
+  }
+
+  function updateTableCount(visible, total) {
+    const el = document.getElementById('tableCount');
+    if (!el) return;
+    if (visible === total) el.textContent = `Mostrando ${visible} conta${visible === 1 ? '' : 's'}`;
+    else el.textContent = `Mostrando ${visible} de ${total} contas`;
+  }
+
   function renderTable(accounts) {
     const wrap = document.getElementById('tableContent');
 
     if (!accounts.length) {
       wrap.innerHTML = `<div class="empty"><div class="icon">🏦</div>Nenhuma conta encontrada.</div>`;
+      updateTableCount(0, allAccounts.length);
       return;
     }
 
-    wrap.innerHTML = `
-      <div class="accounts-list">
-        ${accounts.map(a => `
-          <div class="account-card">
-            <div class="account-main">
-              <div class="account-icon">${typeIcon(a.account_type)}</div>
-              <div class="account-info">
-                <h4>${a.name}</h4>
-                <div class="account-meta">
-                  <span class="badge ${typeBadge(a.account_type)}">${typeLabel(a.account_type)}</span>
-                  ${a.is_main ? '<span class="badge badge-active">Principal</span>' : ''}
-                  <span>${a.bank_name || '—'}</span>
-                  <span>${a.account_number || '—'}</span>
-                </div>
+    wrap.innerHTML = accounts.map(a => {
+      const name = escapeHtml(a.name);
+      const bank = escapeHtml(a.bank_name || 'Sem banco');
+      const number = escapeHtml(a.account_number || 'Sem número');
+      const statusLabel = a.is_active ? 'Ativa' : 'Inativa';
+      const isMain = a.is_main === true;
+      return `
+        <div class="account-row">
+          <div class="account-main">
+            <div class="account-icon">${typeIcon(a.account_type)}</div>
+            <div class="account-title">
+              <div class="account-name" title="${name}">${name}</div>
+              <div class="account-meta">
+                <span>${bank}</span>
+                <span>${number}</span>
+                <span>${typeLabel(a.account_type)}</span>
+                ${isMain ? '<span>Principal</span>' : ''}
               </div>
             </div>
-            <div>
-              <div class="account-label">Saldo</div>
-              <div class="account-balance" style="color:${a.current_balance >= 0 ? 'var(--green)' : 'var(--danger)'}">${format.money(a.current_balance || 0)}</div>
-            </div>
-            <div>
-              <div class="account-label">Status</div>
-              <span class="badge ${a.is_active ? 'badge-active' : 'badge-inactive'}">${a.is_active ? 'Ativa' : 'Inativa'}</span>
-            </div>
-            <div class="account-actions">
-              <button class="btn btn-ghost icon-btn" onclick="editAccount('${a.id}')" title="Editar">✏️</button>
-              <button class="btn btn-danger icon-btn" onclick="deleteAccount('${a.id}', '${a.name}')" title="Excluir">🗑️</button>
-            </div>
           </div>
-        `).join('')}
-      </div>`;
+          <div><span class="badge ${typeBadge(a.account_type)}">${typeLabel(a.account_type)}</span></div>
+          <div>
+            <div class="account-balance" style="color:${getAccountBalance(a) >= 0 ? 'var(--green)' : 'var(--danger)'}">${format.money(getAccountBalance(a))}</div>
+            <div style="margin-top:5px"><span class="badge ${a.is_active ? 'badge-active' : 'badge-inactive'}">${statusLabel}</span></div>
+          </div>
+          <div class="account-actions">
+            <button class="action-menu-btn" onclick="openActionMenu(event, '${a.id}', '${String(a.name || '').replace(/'/g, "\\'")}')" title="Ações">...</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    updateTableCount(accounts.length, allAccounts.length);
   }
 
   function populateBankFilter(accounts) {
     const select = document.getElementById('filterBank');
     const current = select.value;
-    const banks = [...new Set(accounts.map(a => a.bank_name).filter(Boolean))].sort();
-    select.innerHTML = `<option value="">Banco</option>${banks.map(b => `<option value="${b}">${b}</option>`).join('')}`;
+    const banks = [...new Set(accounts.map(a => a.bank_name).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'pt-BR'));
+    select.innerHTML = `<option value="">Todos</option>${banks.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')}`;
     select.value = banks.includes(current) ? current : '';
   }
 
@@ -642,31 +860,58 @@
   };
 
   function updateStats(accounts) {
-    const active    = accounts.filter(a => a.is_active);
-    const total     = active.reduce((s, a) => s + (a.current_balance || 0), 0);
-    const checking  = active.filter(a => a.account_type === 'checking').reduce((s, a) => s + (a.current_balance || 0), 0);
-    const savings   = active.filter(a => a.account_type === 'savings').reduce((s, a) => s + (a.current_balance || 0), 0);
+    const active    = accounts.filter(a => a.is_active !== false);
+    const total     = active.reduce((s, a) => s + getAccountBalance(a), 0);
+    const checking   = active.filter(a => a.account_type === 'checking').reduce((s, a) => s + getAccountBalance(a), 0);
+    const cash       = active.filter(a => a.account_type === 'savings').reduce((s, a) => s + getAccountBalance(a), 0);
+    const investment = active.filter(a => a.account_type === 'investment').reduce((s, a) => s + getAccountBalance(a), 0);
 
-    document.getElementById('totalBalance').textContent   = format.money(total);
-    document.getElementById('totalAccounts').textContent  = active.length;
-    document.getElementById('checkingBalance').textContent = format.money(checking);
-    document.getElementById('savingsBalance').textContent  = format.money(savings);
+    document.getElementById('totalBalance').textContent      = format.money(total);
+    document.getElementById('totalAccounts').textContent     = active.length;
+    document.getElementById('checkingBalance').textContent   = format.money(checking);
+    document.getElementById('cashBalance').textContent       = format.money(cash);
+    document.getElementById('investmentBalance').textContent = format.money(investment);
   }
 
-  // ── Load ──────────────────────────────────────────
   async function loadAccounts() {
     const accounts = await db.select('accounts', {
       eq: { user_id: currentUser.id },
       order: { column: 'created_at', asc: false }
     });
-    allAccounts = accounts;
-    populateBankFilter(accounts);
-    renderTable(accounts);
-    updateStats(accounts);
-    return accounts;
+
+    let transactions = [];
+    try {
+      transactions = await db.select('transactions', {
+        eq: { user_id: currentUser.id }
+      });
+    } catch (err) {
+      console.warn('Não foi possível recalcular saldo por lançamentos. Usando saldo atual salvo na conta.', err?.message || err);
+    }
+
+    const movementByAccount = {};
+    (transactions || []).forEach(tx => {
+      if (!tx.account_id) return;
+      const amount = Number(tx.amount || tx.valor || 0) || 0;
+      const type = tx.tipo || tx.type;
+      const signedAmount = type === 'income' ? amount : -amount;
+      movementByAccount[tx.account_id] = (movementByAccount[tx.account_id] || 0) + signedAmount;
+    });
+
+    allAccounts = (accounts || []).map(account => {
+      const initialBalance = Number(account.initial_balance || 0) || 0;
+      const calculatedBalance = initialBalance + (movementByAccount[account.id] || 0);
+      return {
+        ...account,
+        calculated_balance: calculatedBalance
+      };
+    });
+
+    populateBankFilter(allAccounts);
+    renderTable(allAccounts);
+    updateStats(allAccounts);
+    return allAccounts;
   }
 
-  // ── Modal ─────────────────────────────────────────
   window.openModal = (account = null) => {
     editingId = account ? account.id : null;
     document.getElementById('modalTitle').textContent = account ? 'Editar Conta' : 'Nova Conta';
@@ -675,6 +920,7 @@
     document.getElementById('fBalance').value = account?.initial_balance || '';
     document.getElementById('fBank').value    = account?.bank_name || '';
     document.getElementById('fNumber').value  = account?.account_number || '';
+    document.getElementById('fStatus').value  = account ? String(account.is_active !== false) : 'true';
     document.getElementById('fIsMain').checked = account?.is_main === true;
     document.getElementById('modalOverlay').classList.add('open');
   };
@@ -684,12 +930,10 @@
     editingId = null;
   };
 
-  // Fechar clicando fora
   document.getElementById('modalOverlay').addEventListener('click', (e) => {
     if (e.target === document.getElementById('modalOverlay')) closeModal();
   });
 
-  // ── Save ──────────────────────────────────────────
   window.saveAccount = async () => {
     const name    = document.getElementById('fName').value.trim();
     const type    = document.getElementById('fType').value;
@@ -697,8 +941,10 @@
     const bank    = document.getElementById('fBank').value.trim();
     const number  = document.getElementById('fNumber').value.trim();
     const isMain  = document.getElementById('fIsMain').checked;
+    const isActive = document.getElementById('fStatus').value === 'true';
 
     if (!name) return toast('❌ Informe o nome da conta.', 'error');
+    if (isMain && !isActive) return toast('❌ Uma conta principal precisa estar ativa.', 'error');
 
     const btn = document.getElementById('btnSave');
     btn.disabled = true;
@@ -712,6 +958,7 @@
         bank_name:       bank || null,
         account_number:  number || null,
         is_main:         isMain,
+        is_active:       isActive,
         user_id:         currentUser.id
       };
 
@@ -721,7 +968,8 @@
           account_type:   type,
           bank_name:      bank || null,
           account_number: number || null,
-          is_main:        isMain
+          is_main:        isMain,
+          is_active:      isActive
         }, editingId);
         toast('✅ Conta atualizada!');
       } else {
@@ -738,14 +986,11 @@
     }
   };
 
-  // ── Edit ──────────────────────────────────────────
   window.editAccount = async (id) => {
-    const accounts = await db.select('accounts', { eq: { user_id: currentUser.id } });
-    const account  = accounts.find(a => a.id === id);
+    const account = allAccounts.find(a => a.id === id) || (await db.select('accounts', { eq: { user_id: currentUser.id } })).find(a => a.id === id);
     if (account) openModal(account);
   };
 
-  // ── Delete ────────────────────────────────────────
   window.deleteAccount = async (id, name) => {
     if (!confirm(`Deseja excluir a conta "${name}"? Esta ação não pode ser desfeita.`)) return;
 
@@ -758,12 +1003,48 @@
     }
   };
 
-  // ── Logout ────────────────────────────────────────
+  window.openActionMenu = (event, id, name) => {
+    event.stopPropagation();
+    const menu = document.getElementById('globalActionMenu');
+    if (!menu) return;
+
+    menu.innerHTML = `
+      <button type="button" onclick="editAccount('${id}'); closeActionMenu();">Alterar</button>
+      <button type="button" class="danger" onclick="deleteAccount('${id}', '${String(name).replace(/'/g, "\\'")}'); closeActionMenu();">Excluir</button>
+    `;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    menu.classList.add('open');
+
+    const menuWidth = 150;
+    const menuHeight = 96;
+    let left = rect.right - menuWidth;
+    let top = rect.bottom + 8;
+
+    if (left < 8) left = 8;
+    if (top + menuHeight > window.innerHeight - 8) top = rect.top - menuHeight - 8;
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+  };
+
+  window.closeActionMenu = () => {
+    document.getElementById('globalActionMenu')?.classList.remove('open');
+  };
+
+  document.addEventListener('click', (event) => {
+    const menu = document.getElementById('globalActionMenu');
+    if (!menu) return;
+    if (!menu.contains(event.target) && !event.target.classList.contains('action-menu-btn')) closeActionMenu();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeActionMenu();
+  });
+
   window.logout = async () => {
     try { await logoutUser(); } catch (e) { alert(e.message); }
   };
-
-  // ── Init ──────────────────────────────────────────
   (async () => {
     try {
       initSupabase();
@@ -773,6 +1054,8 @@
         window.location.href = '/public/login.html';
         return;
       }
+
+      restoreSidebarState();
 
       await loadAccounts();
     } catch (err) {

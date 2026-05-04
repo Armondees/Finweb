@@ -4,161 +4,457 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tags - FinWeb</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:     #020617;
-      --card:   #0f172a;
+      --bg: #020617;
+      --card: #0f172a;
+      --card-soft: #111c31;
       --border: #1e293b;
-      --text:   #e2e8f0;
-      --muted:  #94a3b8;
-      --green:  #22c55e;
-      --cyan:   #06b6d4;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #22c55e;
+      --green-dark: #16a34a;
+      --cyan: #06b6d4;
       --danger: #ef4444;
+      --purple: #8b5cf6;
+      --shadow: 0 18px 45px rgba(0,0,0,0.22);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { display: flex; background: var(--bg); color: var(--text); min-height: 100vh; }
+    html, body { min-height: 100dvh; }
 
-    /* SIDEBAR */
-    .sidebar { width: 220px; height: 100vh; position: sticky; top: 0; background: var(--card); border-right: 1px solid var(--border); padding: 24px 16px; display: flex; flex-direction: column; }
-    .logo { font-size: 20px; font-weight: 600; margin-bottom: 32px; padding: 0 8px; }
-    .logo span { color: var(--green); }
-    .menu { flex: 1; }
-    .menu a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 4px; border-radius: 8px; text-decoration: none; color: var(--muted); font-size: 14px; transition: all 0.15s; cursor: pointer; }
-    
-    .menu a.active {
-      background: rgba(34, 197, 94, 0.1);
-      color: var(--green) !important;
-      font-weight: 600;
+    body {
+      display: flex;
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,0.08), transparent 32%),
+        radial-gradient(circle at top right, rgba(6,182,212,0.05), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow: hidden;
     }
-    
+
+    .sidebar {
+      width: 220px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.92);
+      border-right: 1px solid var(--border);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(12px);
+      transition: width .2s ease, padding .2s ease;
+      overflow-x: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: 72px;
+      padding: 20px 10px;
+    }
+
+    .sidebar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      padding: 0 8px;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .logo span { color: var(--green); }
+
+    .sidebar-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: rgba(2,6,23,.55);
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      transition: all .18s ease;
+    }
+    .sidebar-toggle:hover {
+      color: var(--green);
+      border-color: rgba(34,197,94,.42);
+      background: rgba(34,197,94,.08);
+    }
+
+    .menu { flex: 1; }
+    .menu a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 4px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      transition: all 0.18s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .menu a .menu-text { overflow: hidden; text-overflow: ellipsis; }
+    .sidebar.collapsed .logo { width: 0; padding: 0; }
+    .sidebar.collapsed .menu-label,
+    .sidebar.collapsed .menu a .menu-text { display: none; }
+    .sidebar.collapsed .menu a { justify-content: center; padding: 10px; gap: 0; }
+    .sidebar.collapsed .menu-divider { margin: 10px 8px; }
+    .menu a:hover, .menu a.active {
+      background: rgba(34,197,94,0.12);
+      color: var(--green);
+    }
     .menu a.danger:hover {
-      background: rgba(239, 68, 68, 0.1);
+      background: rgba(239,68,68,0.1);
       color: var(--danger);
     }
 
-    .menu-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 12px 12px 6px; font-weight: 600; opacity: 0.7; display: block; }
-    .menu-divider { border: 0; border-top: 1px solid var(--border); margin: 10px 12px; opacity: 0.5; }
-
-    /* MAIN CONTENT */
-    .main { flex: 1; padding: 28px 32px; overflow-y: auto; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    
-    /* TAGS GRID */
-    .tags-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
+    .menu-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      padding: 12px 12px 6px;
+      font-weight: 700;
+      opacity: 0.7;
+      display: block;
     }
 
-    .tag-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
+    .menu-divider {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 10px 12px;
+      opacity: 0.5;
+    }
+
+
+    .main.tags-page {
+      flex: 1;
+      height: 100dvh;
+      padding: 18px 24px max(24px, env(safe-area-inset-bottom));
+      overflow: hidden;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: transform 0.2s;
+      flex-direction: column;
+      font-size: 13px;
     }
-    .tag-card:hover { transform: translateY(-2px); border-color: var(--cyan); }
-    .tag-name { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-    .tag-name::before { content: '#'; color: var(--cyan); font-weight: bold; }
 
-    /* BOTÕES */
-    .btn { padding: 9px 18px; border-radius: 8px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-primary { background: linear-gradient(90deg, var(--green), var(--cyan)); color: white; }
-    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-    .btn-danger-icon { background: transparent; color: var(--muted); border: none; cursor: pointer; padding: 4px; border-radius: 4px; }
-    .btn-danger-icon:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+    .page-header {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 18px; margin-bottom: 12px; flex: 0 0 auto;
+    }
+    .page-title h2 { font-size: 21px; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 4px; }
+    .page-title p { font-size: 12px; color: var(--muted); }
 
-    /* MODAL */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+    .btn {
+      padding: 10px 18px; border-radius: 10px; border: 1px solid transparent;
+      cursor: pointer; font-weight: 600; transition: all 0.2s ease;
+      color: var(--text); background: #334155; white-space: nowrap; font-size: 14px;
+    }
+    .btn:hover { transform: translateY(-1px); opacity: 0.95; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--green), var(--green-dark)); color: white; box-shadow: 0 10px 24px rgba(34,197,94,0.22); }
+    .btn-secondary, .btn-ghost { background: rgba(15, 23, 42, 0.9); border-color: var(--border); color: var(--text); }
+    .btn-danger { background: rgba(239,68,68,0.12); color: var(--danger); border-color: rgba(239,68,68,0.22); }
+    .btn.full { width: 100%; }
+
+    .card {
+      background: linear-gradient(145deg, rgba(15,23,42,0.98), rgba(10,17,32,0.98));
+      border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow);
+    }
+
+    .tags-layout {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+    .tags-side { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+    .side-card { padding: 14px 16px; border-radius: 15px; }
+    .side-card-title { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(148,163,184,.12); }
+    .side-card-title span { font-size: 13px; font-weight: 700; color: var(--text); }
+    .side-card-title small { font-size: 10.5px; color: var(--muted); line-height: 1.35; }
+
+    .summary-line { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 7px 0; border-bottom: 1px solid rgba(148,163,184,.08); font-size: 12px; color: var(--muted); }
+    .summary-line:last-child { border-bottom: none; }
+    .summary-line strong { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .summary-line.total strong { color: var(--cyan); font-size: 14px; }
+    .summary-line.active strong { color: var(--green); }
+
+    .filter-field { margin-bottom: 9px; }
+    .filter-field label, .modal label {
+      font-size: 9.5px; color: #8aa0bd; text-transform: uppercase;
+      letter-spacing: .045em; font-weight: 700; margin-bottom: 5px; display: block;
+    }
+    input {
+      width: 100%; height: 34px; padding: 7px 9px;
+      background: rgba(2,6,23,0.88); border: 1px solid var(--border);
+      color: white; border-radius: 8px; font-size: 12px; outline: none; transition: all 0.2s ease;
+    }
+    input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,0.13); }
+    input::placeholder { color: #64748b; }
+
+    .tags-grid-card {
+      min-width: 0; min-height: 0; height: 100%; display: flex; flex-direction: column;
+      overflow: visible; border-radius: 15px;
+    }
+    .grid-topbar {
+      flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center;
+      gap: 16px; padding: 11px 14px; border-bottom: 1px solid var(--border); background: rgba(2,6,23,.25);
+    }
+    .grid-topbar strong { font-size: 12.5px; color: var(--text); }
+    .grid-topbar small { display: block; margin-top: 3px; font-size: 10.5px; color: var(--muted); }
+
+    .list-header {
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 74px;
+      gap: 14px;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(30,41,59,0.9);
+      background: rgba(255,255,255,0.025);
+      color: #a9c0df;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+    .tags-list-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; }
+    .tag-row {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 74px;
+      align-items: center; gap: 14px; padding: 13px 14px;
+      border-bottom: 1px solid rgba(30,41,59,0.9); transition: background .18s ease;
+    }
+    .tag-row:nth-child(even) { background: rgba(255,255,255,0.012); }
+    .tag-row:hover { background: rgba(34,197,94,0.04); }
+    .tag-main { display: flex; gap: 10px; align-items: center; min-width: 0; }
+    .tag-icon {
+      width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+      background: rgba(6,182,212,0.10); border: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px; font-weight: 700; color: var(--cyan); flex: 0 0 auto;
+    }
+    .tag-text { min-width: 0; }
+    .tag-name { font-size: 13px; font-weight: 650; line-height: 1.25; color: #e5edf8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tag-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 4px; font-size: 10.5px; color: rgba(148,163,184,0.78); line-height: 1.25; }
+    .tag-pill { display:inline-flex; align-items:center; padding:3px 8px; border-radius:999px; font-size:10.5px; font-weight:700; color:var(--green); background:rgba(34,197,94,.10); border:1px solid rgba(34,197,94,.13); }
+
+    .tag-actions { text-align: right; position: relative; }
+    .action-menu-btn {
+      width: 34px; height: 30px; border-radius: 9px; border: 1px solid rgba(148,163,184,0.13);
+      background: rgba(15,23,42,0.72); color: rgba(226,232,240,0.82);
+      cursor: pointer; font-size: 16px; line-height: 1; font-weight: 700; transition: all .18s ease;
+    }
+    .action-menu-btn:hover { color: white; border-color: rgba(34,197,94,0.48); background: rgba(34,197,94,0.08); }
+    .global-action-menu {
+      display: none; position: fixed; min-width: 150px; padding: 6px; border: 1px solid var(--border);
+      border-radius: 12px; background: #0b1220; box-shadow: 0 18px 45px rgba(0,0,0,.42); z-index: 9999;
+    }
+    .global-action-menu.open { display: block; }
+    .global-action-menu button { width: 100%; border: 0; background: transparent; color: var(--text); padding: 9px 10px; border-radius: 9px; text-align: left; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+    .global-action-menu button:hover { background: rgba(34,197,94,0.10); }
+    .global-action-menu button.danger { color: var(--danger); }
+    .global-action-menu button.danger:hover { background: rgba(239,68,68,0.10); }
+
+    .list-footer { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px max(14px, env(safe-area-inset-bottom)); min-height: 42px; border-top: 1px solid var(--border); background: rgba(15,23,42,0.96); color: var(--muted); font-size: 11.5px; }
+    .empty { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 13px; }
+    .empty .icon { font-size: 36px; margin-bottom: 12px; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.open { display: flex; }
-    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 400px; }
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
-    .form-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal { background: var(--card); padding: 28px; border-radius: 16px; width: 100%; max-width: 420px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .modal h3 { margin-bottom: 20px; font-size: 18px; font-weight: 700; }
+    .form-group { margin-bottom: 16px; }
+    .form-group input { height: 38px; padding: 9px 11px; font-size: 13px; border-radius: 10px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
-    .empty-state { text-align: center; padding: 60px; color: var(--muted); grid-column: 1 / -1; }
+    .toast { position: fixed; bottom: max(24px, env(safe-area-inset-bottom)); right: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; font-size: 13px; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--green); color: var(--green); }
+    .toast.error { border-color: var(--danger); color: var(--danger); }
+
+    @media (max-width: 1100px) {
+      body { overflow: auto; }
+      .main.tags-page { height: auto; min-height: 100dvh; overflow: visible; }
+      .tags-layout { grid-template-columns: 1fr; }
+      .tags-side { height: auto; }
+      .tags-grid-card { min-height: 560px; }
+    }
+    @media (max-width: 768px) {
+      body { display: block; }
+      .sidebar { display: none; }
+      .main.tags-page { padding: 18px 14px; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .list-header, .tag-row { grid-template-columns: minmax(220px,1fr) 60px; min-width: 520px; }
+      .tags-list-scroll { overflow-x: auto; }
+    }
   </style>
 </head>
 <body>
-  
-<div class="sidebar">
-  <div class="logo">Fin<span>Web</span></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="logo">Fin<span>Web</span></div>
+    <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" title="Recolher/expandir menu">☰</button>
+  </div>
 
   <nav class="menu">
     <div class="menu-label">Movimentações</div>
-    <a href="/public/dashboard.html" id="link-dash">📊 Dashboard</a>
-    <a href="/public/transactions.html" id="link-tx">💸 Transações</a>
-    <a href="/public/cards.html" id="link-cards">💳 Cartões</a>
-    
+    <a href="/public/dashboard.html" id="link-dash" title="Dashboard">📊 <span class="menu-text">Dashboard</span></a>
+    <a href="/public/transactions.html" id="link-tx" title="Transações">💸 <span class="menu-text">Transações</span></a>
+    <a href="/public/payables_receivables.html?type=expense" title="Pagar/Receber">📅 <span class="menu-text">Pagar/Receber</span></a>
+    <a href="/public/cards.html" title="Cartões">💳 <span class="menu-text">Cartões</span></a>
+
     <hr class="menu-divider">
 
     <div class="menu-label">Demonstrativos</div>
-    <a href="/public/reports.html" id="link-rep">📈 Relatórios</a>
-    <a href="#">🌊 Fluxo de Caixa</a>
-    
+    <a href="/public/reports.html" title="Relatórios">📈 <span class="menu-text">Relatórios</span></a>
+    <a href="#" title="Fluxo de Caixa">🌊 <span class="menu-text">Fluxo de Caixa</span></a>
+
     <hr class="menu-divider">
 
     <div class="menu-label">Cadastro</div>
-    <a href="/public/accounts.html" id="link-acc">🏦 Contas</a>
-    <a href="/public/categories.html" id="link-cat">🏷️ Categorias</a>
-    <a href="/public/cost_centers.html" id="link-cost">🏢 Centro de Custos</a>
-    <a href="/public/tags.html" id="link-tags">🏷️ Tags</a>
+    <a href="/public/accounts.html" title="Contas">🏦 <span class="menu-text">Contas</span></a>
+    <a href="/public/categories.html" title="Categorias">🏷️ <span class="menu-text">Categorias</span></a>
+    <a href="/public/cost_centers.html" title="Centro de Custos">🏢 <span class="menu-text">Centro de Custos</span></a>
+    <a href="/public/Tags.html" id="link-tags" class="active" title="Tags">🏷️ <span class="menu-text">Tags</span></a>
 
     <hr class="menu-divider">
-    <!-- CORREÇÃO DO BOTÃO SAIR[cite: 3] -->
-    <a onclick="logout()" class="danger" style="cursor:pointer">🚪 Sair</a>
+    <a onclick="logout()" class="danger" style="cursor:pointer" title="Sair">🚪 <span class="menu-text">Sair</span></a>
   </nav>
 </div>
 
-<div class="main">
+<div class="main tags-page">
   <div class="page-header">
-    <h2>🏷️ Gerenciar Tags</h2>
+    <div class="page-title">
+      <h2>🏷️ Tags</h2>
+      <p>Organize lançamentos com marcadores simples e flexíveis.</p>
+    </div>
     <button class="btn btn-primary" onclick="openModal()">+ Nova Tag</button>
   </div>
 
-  <div class="tags-container" id="tagsList">
-    <div class="empty-state">Carregando tags...</div>
+  <div class="tags-layout">
+    <aside class="tags-side">
+      <section class="card side-card">
+        <div class="side-card-title">
+          <span>Resumo das tags</span>
+          <small>Visão geral dos marcadores cadastrados.</small>
+        </div>
+        <div class="summary-line total"><span>Total</span><strong id="totalTags">—</strong></div>
+        <div class="summary-line active"><span>Uso</span><strong>Filtros</strong></div>
+      </section>
+
+      <section class="card side-card">
+        <div class="side-card-title">
+          <span>Filtros</span>
+          <small>Refine a lista sem alterar os dados cadastrados.</small>
+        </div>
+        <div class="filter-field">
+          <label>Descrição</label>
+          <input type="text" id="searchTag" placeholder="Buscar tag..." oninput="applyTagFilter()">
+        </div>
+        <button type="button" class="btn btn-secondary full" onclick="clearTagFilter()">Limpar filtros</button>
+      </section>
+    </aside>
+
+    <section class="card tags-grid-card">
+      <div class="grid-topbar">
+        <div>
+          <strong>Suas tags</strong>
+          <small id="tagListLabel">Marcadores disponíveis para lançamentos, filtros e relatórios</small>
+        </div>
+      </div>
+
+      <div class="list-header">
+        <div>Nome / Identificação</div>
+        <div style="text-align:right">Ações</div>
+      </div>
+
+      <div class="tags-list-scroll" id="tagsList">
+        <div class="empty"><div class="icon">⏳</div>Carregando tags...</div>
+      </div>
+
+      <div class="list-footer">
+        <span id="listCount">Mostrando 0 tags</span>
+        <span>Ações disponíveis no menu da linha</span>
+      </div>
+    </section>
   </div>
 </div>
 
-<!-- MODAL -->
+<div class="global-action-menu" id="globalActionMenu" role="menu" aria-hidden="true">
+  <button type="button" onclick="editSelectedTag()">Alterar</button>
+  <button type="button" class="danger" onclick="deleteSelectedTag()">Excluir</button>
+</div>
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <h3 id="modalTitle" style="margin-bottom: 20px;">Nova Tag</h3>
+    <h3 id="modalTitle">Nova Tag</h3>
     <div class="form-group">
       <label>Nome da Tag</label>
-      <input type="text" id="tagName" placeholder="Ex: Viagem2024, Reembolsável...">
+      <input type="text" id="tagName" placeholder="Ex.: Viagem, Reembolsável, Prioridade">
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="btnSave" onclick="saveTag()">Salvar Tag</button>
     </div>
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script type="module">
   import { initSupabase, getCurrentUser, db } from '../src/js/utils/db.js';
-  import { logoutUser } from '../src/js/modules/auth.js'; // IMPORTAÇÃO DO LOGOUT[cite: 1]
+  import { logoutUser } from '../src/js/modules/auth.js';
 
-  // FUNÇÃO GLOBAL DE LOGOUT[cite: 1]
-  window.logout = async () => {
-    try {
-      await logoutUser();
-    } catch (e) {
-      alert("Erro ao sair: " + e.message);
-    }
+  let currentUser = null;
+  let allTags = [];
+  let editingId = null;
+  let selectedActionId = null;
+
+  window.toggleSidebar = () => {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed');
+    localStorage.setItem('finweb_sidebar_collapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
   };
 
-  function activateMenu() {
-    const currentPath = window.location.pathname;
-    document.querySelectorAll('.menu a').forEach(link => link.classList.remove('active'));
+  function restoreSidebarState() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const collapsed = localStorage.getItem('finweb_sidebar_collapsed') === 'true';
+    sidebar.classList.toggle('collapsed', collapsed);
+  }
 
+  window.logout = async () => {
+    try { await logoutUser(); } catch (e) { alert('Erro ao sair: ' + e.message); }
+  };
+
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    setTimeout(() => el.classList.remove('show'), 2800);
+  }
+
+  function activateMenu() {
+    const currentPath = window.location.pathname.toLowerCase();
+    document.querySelectorAll('.menu a').forEach(link => link.classList.remove('active'));
     if (currentPath.includes('dashboard.html'))     document.getElementById('link-dash')?.classList.add('active');
     if (currentPath.includes('transactions.html'))  document.getElementById('link-tx')?.classList.add('active');
     if (currentPath.includes('accounts.html'))      document.getElementById('link-acc')?.classList.add('active');
@@ -167,9 +463,18 @@
     if (currentPath.includes('tags.html'))          document.getElementById('link-tags')?.classList.add('active');
   }
 
-  let currentUser = null;
-  let allTags = [];
-  let editingId = null;
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function normalizeText(value) {
+    return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
 
   async function loadTags() {
     try {
@@ -177,52 +482,149 @@
         eq: { user_id: currentUser.id },
         order: { column: 'name', asc: true }
       });
-      renderTags();
+      updateStats();
+      applyTagFilter();
     } catch (error) {
-      console.error("Erro ao carregar tags:", error);
+      console.error('Erro ao carregar tags:', error);
+      toast('Erro ao carregar tags: ' + error.message, 'error');
     }
   }
 
-  function renderTags() {
+  function updateStats() {
+    document.getElementById('totalTags').textContent = allTags.length;
+  }
+
+  window.applyTagFilter = () => {
+    const term = normalizeText(document.getElementById('searchTag')?.value || '');
+    const filtered = allTags.filter(tag => normalizeText(tag.name).includes(term));
+    renderTags(filtered);
+  };
+
+  window.clearTagFilter = () => {
+    document.getElementById('searchTag').value = '';
+    applyTagFilter();
+  };
+
+  function updateTableCount(visible, total) {
+    const count = document.getElementById('listCount');
+    if (!count) return;
+    if (visible === total) count.textContent = `Mostrando ${visible} tag${visible === 1 ? '' : 's'}`;
+    else count.textContent = `Mostrando ${visible} de ${total} tags`;
+  }
+
+  function renderTags(tags) {
     const container = document.getElementById('tagsList');
-    if (allTags.length === 0) {
-      container.innerHTML = '<div class="empty-state">Nenhuma tag cadastrada ainda.</div>';
+
+    if (!tags.length) {
+      container.innerHTML = '<div class="empty"><div class="icon">🏷️</div>Nenhuma tag encontrada.</div>';
+      updateTableCount(0, allTags.length);
       return;
     }
 
-    container.innerHTML = allTags.map(tag => `
-      <div class="tag-card">
-        <span class="tag-name">${tag.name}</span>
-        <div style="display: flex; gap: 4px;">
-          <button class="btn-danger-icon" onclick="editTag('${tag.id}', '${tag.name}')" title="Editar">✏️</button>
-          <button class="btn-danger-icon" onclick="deleteTag('${tag.id}', '${tag.name}')" title="Excluir">🗑️</button>
+    container.innerHTML = tags.map(tag => {
+      const safeName = escapeHtml(tag.name || 'Sem nome');
+      return `
+        <div class="tag-row">
+          <div class="tag-main">
+            <div class="tag-icon">#</div>
+            <div class="tag-text">
+              <div class="tag-name" title="${safeName}">${safeName}</div>
+              <div class="tag-meta">
+                <span class="tag-pill">Marcador financeiro</span>
+                <span>Use em lançamentos, filtros e relatórios</span>
+              </div>
+            </div>
+          </div>
+          <div class="tag-actions">
+            <button class="action-menu-btn" type="button" onclick="openActionMenu(event, '${tag.id}')" aria-label="Ações da tag">...</button>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
+    updateTableCount(tags.length, allTags.length);
   }
+
+  window.openActionMenu = (event, id) => {
+    event.stopPropagation();
+    selectedActionId = id;
+    const menu = document.getElementById('globalActionMenu');
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    menu.classList.add('open');
+    menu.setAttribute('aria-hidden', 'false');
+
+    const menuWidth = 150;
+    const menuHeight = 96;
+    const gap = 8;
+
+    let left = rect.right - menuWidth;
+    let top = rect.bottom + gap;
+
+    if (top + menuHeight > window.innerHeight - 12) top = rect.top - menuHeight - gap;
+    if (left < 12) left = 12;
+    if (left + menuWidth > window.innerWidth - 12) left = window.innerWidth - menuWidth - 12;
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+  };
+
+  function closeActionMenu() {
+    const menu = document.getElementById('globalActionMenu');
+    menu.classList.remove('open');
+    menu.setAttribute('aria-hidden', 'true');
+  }
+
+  window.editSelectedTag = () => {
+    if (!selectedActionId) return;
+    const tag = allTags.find(t => t.id === selectedActionId);
+    closeActionMenu();
+    if (tag) editTag(tag.id, tag.name);
+  };
+
+  window.deleteSelectedTag = () => {
+    if (!selectedActionId) return;
+    const tag = allTags.find(t => t.id === selectedActionId);
+    closeActionMenu();
+    if (tag) deleteTag(tag.id, tag.name);
+  };
+
+  document.addEventListener('click', closeActionMenu);
+  window.addEventListener('resize', closeActionMenu);
+  window.addEventListener('scroll', closeActionMenu, true);
 
   window.openModal = () => {
     editingId = null;
     document.getElementById('modalTitle').textContent = 'Nova Tag';
     document.getElementById('tagName').value = '';
     document.getElementById('modalOverlay').classList.add('open');
-    document.getElementById('tagName').focus();
+    setTimeout(() => document.getElementById('tagName').focus(), 60);
   };
 
   window.editTag = (id, name) => {
     editingId = id;
     document.getElementById('modalTitle').textContent = 'Editar Tag';
-    document.getElementById('tagName').value = name;
+    document.getElementById('tagName').value = name || '';
     document.getElementById('modalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('tagName').focus(), 60);
   };
 
   window.closeModal = () => {
     document.getElementById('modalOverlay').classList.remove('open');
+    editingId = null;
   };
+
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  });
+
+  document.getElementById('tagName').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') saveTag();
+  });
 
   window.saveTag = async () => {
     const name = document.getElementById('tagName').value.trim();
-    if (!name) return alert("Por favor, digite um nome para a tag.");
+    if (!name) return toast('Digite um nome para a tag.', 'error');
 
     const btn = document.getElementById('btnSave');
     btn.disabled = true;
@@ -230,16 +632,15 @@
     try {
       if (editingId) {
         await db.update('tags', { name }, editingId);
+        toast('✅ Tag atualizada.');
       } else {
-        await db.insert('tags', {
-          name,
-          user_id: currentUser.id
-        });
+        await db.insert('tags', { name, user_id: currentUser.id });
+        toast('✅ Tag criada.');
       }
       closeModal();
-      loadTags();
+      await loadTags();
     } catch (error) {
-      alert("Erro ao salvar: " + error.message);
+      toast('Erro ao salvar: ' + error.message, 'error');
     } finally {
       btn.disabled = false;
     }
@@ -250,24 +651,29 @@
 
     try {
       await db.delete('tags', id);
-      loadTags();
+      toast('✅ Tag excluída.');
+      await loadTags();
     } catch (error) {
-      alert("Erro ao excluir: " + error.message);
+      toast('Erro ao excluir: ' + error.message, 'error');
     }
   };
 
-  // Inicialização
   (async () => {
-    initSupabase();
-    currentUser = await getCurrentUser();
-    if (!currentUser) {
-      window.location.href = '/public/login.html';
-      return;
+    try {
+      initSupabase();
+      currentUser = await getCurrentUser();
+      if (!currentUser) {
+        window.location.href = '/public/login.html';
+        return;
+      }
+      restoreSidebarState();
+      activateMenu();
+      await loadTags();
+    } catch (err) {
+      console.error('Erro inicial:', err);
+      alert(err.message);
     }
-    activateMenu(); // ATIVA O DESTAQUE NO MENU[cite: 3]
-    loadTags();
   })();
 </script>
-
 </body>
 </html>

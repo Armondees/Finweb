@@ -40,20 +40,55 @@
       top: 0;
       background: rgba(15, 23, 42, 0.92);
       border-right: 1px solid var(--border);
-      padding: 24px 16px;
+      padding: 20px 14px;
       display: flex;
       flex-direction: column;
       backdrop-filter: blur(12px);
+      transition: width .2s ease, padding .2s ease;
+      overflow-x: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: 72px;
+      padding: 20px 10px;
+    }
+
+    .sidebar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 28px;
     }
 
     .logo {
       font-size: 20px;
       font-weight: 700;
-      margin-bottom: 32px;
       padding: 0 8px;
       letter-spacing: -0.04em;
+      white-space: nowrap;
+      overflow: hidden;
     }
     .logo span { color: var(--green); }
+
+    .sidebar-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: rgba(2,6,23,.55);
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      transition: all .18s ease;
+    }
+    .sidebar-toggle:hover {
+      color: var(--green);
+      border-color: rgba(34,197,94,.42);
+      background: rgba(34,197,94,.08);
+    }
 
     .menu { flex: 1; }
     .menu a {
@@ -68,7 +103,14 @@
       font-size: 14px;
       transition: all 0.18s ease;
       cursor: pointer;
+      white-space: nowrap;
     }
+    .menu a .menu-text { overflow: hidden; text-overflow: ellipsis; }
+    .sidebar.collapsed .logo { width: 0; padding: 0; }
+    .sidebar.collapsed .menu-label,
+    .sidebar.collapsed .menu a .menu-text { display: none; }
+    .sidebar.collapsed .menu a { justify-content: center; padding: 10px; gap: 0; }
+    .sidebar.collapsed .menu-divider { margin: 10px 8px; }
     .menu a:hover, .menu a.active {
       background: rgba(34,197,94,0.12);
       color: var(--green);
@@ -1016,7 +1058,7 @@
     }
 
     .extrato-table {
-      min-width: 720px;
+      min-width: 840px;
       table-layout: fixed;
     }
 
@@ -1034,13 +1076,20 @@
 
     .extrato-table th:nth-child(3),
     .extrato-table td:nth-child(3) {
-      width: 150px;
+      width: 135px;
       text-align: right;
       white-space: nowrap;
     }
 
     .extrato-table th:nth-child(4),
     .extrato-table td:nth-child(4) {
+      width: 135px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .extrato-table th:nth-child(5),
+    .extrato-table td:nth-child(5) {
       width: 74px;
       text-align: right;
       position: relative;
@@ -1386,6 +1435,87 @@
       font-size: 12.5px;
     }
 
+    .tx-date {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(226,232,240,0.78);
+      white-space: nowrap;
+    }
+
+    .tx-balance {
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+
+    .saldo-anterior-row {
+      background: rgba(34,197,94,0.045) !important;
+    }
+
+    .saldo-anterior-row td {
+      border-top: 1px solid rgba(34,197,94,0.16) !important;
+      border-bottom: 1px solid rgba(34,197,94,0.10);
+    }
+
+    .saldo-anterior-cell-right {
+      text-align: right !important;
+      padding: 7px 12px 8px !important;
+      white-space: nowrap;
+    }
+
+    .saldo-anterior-box {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: rgba(148,163,184,0.82);
+      line-height: 1.2;
+    }
+
+    .saldo-anterior-box span {
+      opacity: 0.78;
+      font-weight: 500;
+    }
+
+    .saldo-anterior-box strong {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .selected-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      min-height: 0;
+    }
+
+    .selected-tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(34,197,94,0.10);
+      border: 1px solid rgba(34,197,94,0.18);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .selected-tag-pill button {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      padding: 0;
+    }
+
     .extrato-grid-card .table-footer {
       min-height: 42px;
       padding: 10px 14px max(14px, env(safe-area-inset-bottom));
@@ -1403,35 +1533,567 @@
       .extrato-grid-card { height: auto !important; }
     }
 
+
+    /* ============================================================
+       Conciliação, navegação mensal e modal com detalhes
+       ============================================================ */
+    .month-nav {
+      display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px;
+    }
+    .month-nav-btn {
+      width:28px; height:28px; border-radius:9px; border:1px solid rgba(148,163,184,.16);
+      background:rgba(2,6,23,.55); color:var(--muted); cursor:pointer; font-weight:800; display:grid; place-items:center;
+    }
+    .month-nav-btn:hover { color:var(--green); border-color:rgba(34,197,94,.42); background:rgba(34,197,94,.08); }
+    .month-nav-label { min-width:120px; text-align:center; color:var(--text); font-size:12px; font-weight:700; }
+    .grid-legend { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:4px; }
+    .legend-item { display:inline-flex; align-items:center; gap:5px; font-size:10.5px; color:var(--muted); }
+    .status-dot { width:9px; height:9px; border-radius:999px; display:inline-block; box-shadow:0 0 0 3px rgba(255,255,255,.03); }
+    .status-dot.confirmed { background:var(--green); }
+    .status-dot.pending { background:var(--warning); }
+    .reconciled-icon { color:var(--cyan); font-size:13px; margin-left:6px; }
+    .tx-check { width:16px; height:16px; accent-color:var(--green); cursor:pointer; }
+    .selected-total { color:var(--green); font-weight:700; white-space:nowrap; }
+    .summary-line.reconciled strong { color:var(--cyan); }
+    .summary-line.unreconciled strong { color:var(--warning); }
+    .extrato-table { min-width:940px; }
+    .extrato-table th:nth-child(1), .extrato-table td:nth-child(1) { width:34px; text-align:center; }
+    .extrato-table th:nth-child(2), .extrato-table td:nth-child(2) { width:34px; text-align:center; }
+    .extrato-table th:nth-child(3), .extrato-table td:nth-child(3) { width:104px; }
+    .extrato-table th:nth-child(5), .extrato-table td:nth-child(5),
+    .extrato-table th:nth-child(6), .extrato-table td:nth-child(6) { width:130px; text-align:right; }
+    .extrato-table th:nth-child(7), .extrato-table td:nth-child(7) { width:74px; text-align:right; position:relative; }
+    .modal.transaction-modal { max-width:520px; transition:max-width .2s ease; }
+    .modal.transaction-modal.details-open { max-width:920px; }
+    .transaction-modal-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:18px; align-items:start; }
+    .transaction-modal.details-open .transaction-modal-layout { grid-template-columns:minmax(0,1fr) 330px; }
+    .transaction-details-panel { display:none; padding-left:18px; border-left:1px solid rgba(148,163,184,.14); }
+    .transaction-modal.details-open .transaction-details-panel { display:block; }
+    .details-toggle-row { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-top:2px; margin-bottom:14px; }
+    .details-toggle-row small { color:var(--muted); font-size:11.5px; line-height:1.35; }
+    .details-panel-title { margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid rgba(148,163,184,.12); }
+    .details-panel-title strong { display:block; font-size:13px; color:var(--text); }
+    .details-panel-title span { display:block; margin-top:3px; font-size:11px; color:var(--muted); line-height:1.35; }
+    .checkbox-line { display:flex; align-items:center; gap:8px; color:var(--text); font-size:12px; }
+    .checkbox-line input { width:16px; height:16px; accent-color:var(--green); }
+    @media (max-width:900px) {
+      .modal.transaction-modal.details-open { max-width:560px; }
+      .transaction-modal.details-open .transaction-modal-layout { grid-template-columns:1fr; }
+      .transaction-details-panel { padding-left:0; border-left:0; padding-top:14px; border-top:1px solid rgba(148,163,184,.14); }
+    }
+
+
+
+
+    /* ============================================================
+       Ajuste harmônico da grid: linhas compactas sem sobreposição
+       ============================================================ */
+    .extrato-table {
+      min-width: 1040px !important;
+      table-layout: fixed;
+    }
+
+    .extrato-table th,
+    .extrato-table td {
+      box-sizing: border-box;
+    }
+
+    .extrato-table th:nth-child(1),
+    .extrato-table td:nth-child(1) {
+      width: 36px !important;
+      min-width: 36px !important;
+      max-width: 36px !important;
+      text-align: center !important;
+      padding-left: 8px !important;
+      padding-right: 6px !important;
+    }
+
+    .extrato-table th:nth-child(2),
+    .extrato-table td:nth-child(2) {
+      width: 36px !important;
+      min-width: 36px !important;
+      max-width: 36px !important;
+      text-align: center !important;
+      padding-left: 6px !important;
+      padding-right: 6px !important;
+    }
+
+    .extrato-table th:nth-child(3),
+    .extrato-table td:nth-child(3) {
+      width: 92px !important;
+      min-width: 92px !important;
+      max-width: 92px !important;
+      text-align: left !important;
+      padding-left: 8px !important;
+      padding-right: 8px !important;
+      white-space: nowrap !important;
+    }
+
+    .extrato-table th:nth-child(4),
+    .extrato-table td:nth-child(4) {
+      width: auto !important;
+      min-width: 420px !important;
+      text-align: left !important;
+      padding-left: 10px !important;
+      padding-right: 16px !important;
+      overflow: hidden;
+    }
+
+    .extrato-table th:nth-child(5),
+    .extrato-table td:nth-child(5) {
+      width: 142px !important;
+      min-width: 142px !important;
+      max-width: 142px !important;
+      text-align: right !important;
+      padding-left: 10px !important;
+      padding-right: 18px !important;
+      white-space: nowrap !important;
+    }
+
+    .extrato-table th:nth-child(6),
+    .extrato-table td:nth-child(6) {
+      width: 142px !important;
+      min-width: 142px !important;
+      max-width: 142px !important;
+      text-align: right !important;
+      padding-left: 10px !important;
+      padding-right: 18px !important;
+      white-space: nowrap !important;
+    }
+
+    .extrato-table th:nth-child(7),
+    .extrato-table td:nth-child(7) {
+      width: 72px !important;
+      min-width: 72px !important;
+      max-width: 72px !important;
+      text-align: right !important;
+      position: relative;
+      padding-left: 6px !important;
+      padding-right: 12px !important;
+      overflow: visible !important;
+    }
+
+    .extrato-table th {
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+      font-size: 9.5px !important;
+    }
+
+    .extrato-table td {
+      padding-top: 7px !important;
+      padding-bottom: 7px !important;
+      vertical-align: middle !important;
+      line-height: 1.18 !important;
+    }
+
+    .tx-date {
+      display: inline-block;
+      width: 100%;
+      text-align: left !important;
+      font-size: 10.8px !important;
+      font-weight: 550 !important;
+      color: rgba(226,232,240,0.78);
+      white-space: nowrap;
+    }
+
+    .tx-description {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 2px !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }
+
+    .tx-description-main {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      font-size: 12.4px !important;
+      font-weight: 650 !important;
+      line-height: 1.18 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      color: #e5edf8;
+    }
+
+    .tx-description-meta {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 6px !important;
+      align-items: center !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+      font-size: 9.4px !important;
+      line-height: 1.12 !important;
+      color: rgba(148,163,184,0.74);
+    }
+
+    .tx-description-meta span {
+      display: inline-block !important;
+      flex: 0 1 auto !important;
+      min-width: 0 !important;
+      max-width: 150px !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    .tx-description-meta span + span::before {
+      content: '•';
+      margin-right: 5px;
+      color: rgba(148,163,184,0.42);
+    }
+
+    .tx-value,
+    .tx-balance {
+      display: inline-block;
+      width: 100%;
+      text-align: right !important;
+      font-size: 12px !important;
+      line-height: 1.15 !important;
+      white-space: nowrap !important;
+    }
+
+    .tx-check {
+      width: 14px !important;
+      height: 14px !important;
+    }
+
+    .status-dot {
+      width: 8px !important;
+      height: 8px !important;
+    }
+
+    .reconciled-icon {
+      font-size: 11px !important;
+      margin-left: 3px !important;
+    }
+
+    .more-action-btn {
+      width: 30px !important;
+      height: 26px !important;
+      font-size: 14px !important;
+      border-radius: 8px !important;
+    }
+
+    .tx-action-menu {
+      right: 8px !important;
+      top: 31px !important;
+      z-index: 9999 !important;
+    }
+
+    .saldo-anterior-row td {
+      padding-top: 5px !important;
+      padding-bottom: 5px !important;
+    }
+
+    .saldo-anterior-cell-right {
+      text-align: right !important;
+      padding-right: 18px !important;
+    }
+
+    .saldo-anterior-box {
+      justify-content: flex-end !important;
+      font-size: 10px !important;
+      gap: 7px !important;
+    }
+
+    .saldo-anterior-box strong {
+      font-size: 11px !important;
+    }
+
+    @media (max-width: 1180px) {
+      .extrato-table { min-width: 980px !important; }
+      .extrato-table th:nth-child(4),
+      .extrato-table td:nth-child(4) { min-width: 360px !important; }
+      .tx-description-meta span { max-width: 120px !important; }
+    }
+
+    @media (max-width: 760px) {
+      .extrato-table { min-width: 920px !important; }
+      .extrato-table th:nth-child(4),
+      .extrato-table td:nth-child(4) { min-width: 320px !important; }
+      .tx-description-meta { flex-wrap: wrap !important; row-gap: 2px !important; }
+    }
+
+  
+
+    /* ============================================================
+       Ajuste final: grid sem scroll horizontal, compacta e sem sobreposição
+       ============================================================ */
+    .extrato-table-scroll {
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+    }
+
+    .extrato-table {
+      width: 100% !important;
+      min-width: 0 !important;
+      table-layout: fixed !important;
+    }
+
+    .extrato-table th,
+    .extrato-table td {
+      box-sizing: border-box;
+      overflow: hidden;
+      vertical-align: middle !important;
+    }
+
+    .extrato-table th:nth-child(1),
+    .extrato-table td:nth-child(1) {
+      width: 32px !important;
+      min-width: 32px !important;
+      max-width: 32px !important;
+      padding-left: 8px !important;
+      padding-right: 4px !important;
+      text-align: center !important;
+    }
+
+    .extrato-table th:nth-child(2),
+    .extrato-table td:nth-child(2) {
+      width: 34px !important;
+      min-width: 34px !important;
+      max-width: 34px !important;
+      padding-left: 4px !important;
+      padding-right: 4px !important;
+      text-align: center !important;
+    }
+
+    .extrato-table th:nth-child(3),
+    .extrato-table td:nth-child(3) {
+      width: 82px !important;
+      min-width: 82px !important;
+      max-width: 82px !important;
+      padding-left: 6px !important;
+      padding-right: 8px !important;
+      text-align: left !important;
+      white-space: nowrap !important;
+    }
+
+    .extrato-table th:nth-child(4),
+    .extrato-table td:nth-child(4) {
+      width: auto !important;
+      min-width: 0 !important;
+      text-align: left !important;
+      padding-left: 8px !important;
+      padding-right: 10px !important;
+    }
+
+    .extrato-table th:nth-child(5),
+    .extrato-table td:nth-child(5) {
+      width: 104px !important;
+      min-width: 104px !important;
+      max-width: 104px !important;
+      text-align: right !important;
+      padding-left: 6px !important;
+      padding-right: 8px !important;
+      white-space: nowrap !important;
+    }
+
+    .extrato-table th:nth-child(6),
+    .extrato-table td:nth-child(6) {
+      width: 104px !important;
+      min-width: 104px !important;
+      max-width: 104px !important;
+      text-align: right !important;
+      padding-left: 6px !important;
+      padding-right: 8px !important;
+      white-space: nowrap !important;
+    }
+
+    .extrato-table th:nth-child(7),
+    .extrato-table td:nth-child(7) {
+      width: 52px !important;
+      min-width: 52px !important;
+      max-width: 52px !important;
+      text-align: right !important;
+      padding-left: 4px !important;
+      padding-right: 8px !important;
+      position: relative;
+      overflow: visible;
+    }
+
+    .extrato-table th {
+      padding-top: 7px !important;
+      padding-bottom: 7px !important;
+      font-size: 9px !important;
+    }
+
+    .extrato-table td {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      font-size: 11.5px !important;
+      line-height: 1.15 !important;
+    }
+
+    .tx-date {
+      display: inline-block;
+      width: 100%;
+      text-align: left;
+      font-size: 10.5px !important;
+      letter-spacing: -0.02em;
+    }
+
+    .tx-description {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 2px !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .tx-description-main {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      font-size: 12px !important;
+      line-height: 1.15 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    .tx-description-meta {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 4px !important;
+      align-items: center !important;
+      overflow: hidden !important;
+      white-space: nowrap !important;
+      font-size: 9px !important;
+      line-height: 1.1 !important;
+    }
+
+    .tx-description-meta span {
+      min-width: 0 !important;
+      max-width: 24% !important;
+      flex: 0 1 auto !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    .tx-description-meta span + span::before {
+      margin-right: 3px !important;
+    }
+
+    .tx-value,
+    .tx-balance {
+      display: inline-block;
+      width: 100%;
+      text-align: right;
+      font-size: 11.5px !important;
+      line-height: 1.15 !important;
+      letter-spacing: -0.02em;
+    }
+
+    .more-action-btn {
+      width: 28px !important;
+      height: 24px !important;
+      font-size: 13px !important;
+      border-radius: 7px !important;
+    }
+
+    .tx-action-menu {
+      right: 6px !important;
+      top: 30px !important;
+      min-width: 124px !important;
+    }
+
+    .tx-check {
+      width: 13px !important;
+      height: 13px !important;
+    }
+
+    .status-dot {
+      width: 8px !important;
+      height: 8px !important;
+    }
+
+    .reconciled-icon {
+      font-size: 10px !important;
+      margin-left: 3px !important;
+    }
+
+    .saldo-anterior-row td {
+      padding-top: 5px !important;
+      padding-bottom: 5px !important;
+    }
+
+    .saldo-anterior-cell-right {
+      padding-right: 8px !important;
+      text-align: right !important;
+    }
+
+    .saldo-anterior-box {
+      justify-content: flex-end !important;
+      gap: 6px !important;
+      font-size: 10px !important;
+      white-space: nowrap !important;
+    }
+
+    .saldo-anterior-box strong {
+      font-size: 10.5px !important;
+    }
+
+    @media (max-width: 1180px) {
+      .extrato-layout { grid-template-columns: 270px minmax(0, 1fr) !important; }
+      .extrato-table th:nth-child(5),
+      .extrato-table td:nth-child(5),
+      .extrato-table th:nth-child(6),
+      .extrato-table td:nth-child(6) {
+        width: 92px !important;
+        min-width: 92px !important;
+        max-width: 92px !important;
+      }
+      .tx-description-meta span { max-width: 22% !important; }
+    }
+
+    @media (max-width: 900px) {
+      .extrato-table-scroll { overflow-x: auto !important; }
+      .extrato-table { min-width: 820px !important; }
+      .tx-description-meta span { max-width: 180px !important; }
+    }
+
   </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <div class="logo">Fin<span>Web</span></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="logo">Fin<span>Web</span></div>
+    <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" title="Recolher/expandir menu">☰</button>
+  </div>
 
   <nav class="menu">
     <div class="menu-label">Movimentações</div>
-    <a href="/public/dashboard.html" id="link-dash">📊 Dashboard</a>
-    <a href="/public/transactions.html" id="link-tx" class="active">💸 Transações</a>
-    <a href="/public/cards.html">💳 Cartões</a>
+    <a href="/public/dashboard.html" id="link-dash" title="Dashboard">📊 <span class="menu-text">Dashboard</span></a>
+    <a href="/public/transactions.html" id="link-tx" class="active" title="Transações">💸 <span class="menu-text">Transações</span></a>
+    <a href="/public/payables_receivables.html?type=expense" title="Pagar/Receber">📅 <span class="menu-text">Pagar/Receber</span></a>
+    <a href="/public/cards.html" title="Cartões">💳 <span class="menu-text">Cartões</span></a>
 
     <hr class="menu-divider">
 
     <div class="menu-label">Demonstrativos</div>
-    <a href="/public/reports.html">📈 Relatórios</a>
-    <a href="#">🌊 Fluxo de Caixa</a>
+    <a href="/public/reports.html" title="Relatórios">📈 <span class="menu-text">Relatórios</span></a>
+    <a href="#" title="Fluxo de Caixa">🌊 <span class="menu-text">Fluxo de Caixa</span></a>
 
     <hr class="menu-divider">
 
     <div class="menu-label">Cadastro</div>
-    <a href="/public/accounts.html">🏦 Contas</a>
-    <a href="/public/categories.html">🏷️ Categorias</a>
-    <a href="/public/cost_centers.html">🏢 Centro de Custos</a>
-    <a href="/public/Tags.html">🏷️ Tags</a>
+    <a href="/public/accounts.html" title="Contas">🏦 <span class="menu-text">Contas</span></a>
+    <a href="/public/categories.html" title="Categorias">🏷️ <span class="menu-text">Categorias</span></a>
+    <a href="/public/cost_centers.html" title="Centro de Custos">🏢 <span class="menu-text">Centro de Custos</span></a>
+    <a href="/public/Tags.html" title="Tags">🏷️ <span class="menu-text">Tags</span></a>
 
     <hr class="menu-divider">
-    <a onclick="logout()" class="danger" style="cursor:pointer">🚪 Sair</a>
+    <a onclick="logout()" class="danger" style="cursor:pointer" title="Sair">🚪 <span class="menu-text">Sair</span></a>
   </nav>
 </div>
 
@@ -1453,6 +2115,12 @@
           <small>Filtro inicial da tela</small>
         </div>
 
+        <div class="month-nav" aria-label="Navegação de mês fechado">
+          <button type="button" class="month-nav-btn" onclick="changeClosedMonth(-1)" title="Mês anterior">&lt;</button>
+          <div class="month-nav-label" id="closedMonthLabel">Mês atual</div>
+          <button type="button" class="month-nav-btn" onclick="changeClosedMonth(1)" title="Próximo mês">&gt;</button>
+        </div>
+
         <div class="side-field">
           <label>Conta principal</label>
           <div class="autocomplete-wrap">
@@ -1465,11 +2133,11 @@
         <div class="period-row">
           <div class="side-field">
             <label>Mês</label>
-            <select id="filter_month" onchange="loadTransactions()"></select>
+            <select id="filter_month" onchange="updateClosedMonthLabel(); loadTransactions()"></select>
           </div>
           <div class="side-field">
             <label>Ano</label>
-            <select id="filter_year" onchange="loadTransactions()"></select>
+            <select id="filter_year" onchange="updateClosedMonthLabel(); loadTransactions()"></select>
           </div>
         </div>
       </section>
@@ -1496,15 +2164,14 @@
           <span>Saldo final</span>
           <strong id="summary_final">R$ 0,00</strong>
         </div>
-      </section>
-
-      <section class="card side-card quick-help">
-        <div class="side-card-title">
-          <span>Filtros dinâmicos</span>
-          <small>Use somente quando precisar refinar o extrato.</small>
+        <div class="summary-line reconciled">
+          <span>Saldo conciliado</span>
+          <strong id="summary_reconciled">R$ 0,00</strong>
         </div>
-        <button type="button" class="btn btn-secondary full" onclick="toggleAdvancedFilters()">Filtrar lançamentos</button>
-        <button type="button" class="btn btn-secondary full muted-btn" onclick="clearFilters()">Limpar filtros</button>
+        <div class="summary-line unreconciled">
+          <span>Sem conciliação</span>
+          <strong id="summary_unreconciled">R$ 0,00</strong>
+        </div>
       </section>
     </aside>
 
@@ -1514,10 +2181,16 @@
         <div>
           <div id="periodLabel">📅 Exibindo movimentações do período selecionado</div>
           <small id="activeFiltersLabel">Filtro padrão aplicado</small>
+          <div class="grid-legend">
+            <span class="legend-item"><span class="status-dot confirmed"></span> Confirmado</span>
+            <span class="legend-item"><span class="status-dot pending"></span> Pendente</span>
+            <span class="legend-item"><span class="reconciled-icon">✓</span> Conciliado</span>
+          </div>
         </div>
         <div class="grid-actions">
           <button type="button" class="btn btn-secondary" onclick="toggleAdvancedFilters()">Filtrar</button>
           <button type="button" class="btn btn-secondary" onclick="clearFilters()">Limpar</button>
+          <button type="button" class="btn btn-secondary" onclick="reconcileSelectedTransactions()">Conciliar selecionados</button>
         </div>
       </div>
 
@@ -1534,6 +2207,24 @@
               <option value="">Todos</option>
               <option value="income">Receitas</option>
               <option value="expense">Despesas</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Status</label>
+            <select id="filter_status" onchange="applyViewFilters()">
+              <option value="">Todos</option>
+              <option value="confirmed">Confirmados</option>
+              <option value="pending">Pendentes</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Conciliação</label>
+            <select id="filter_reconciled" onchange="applyViewFilters()">
+              <option value="">Todos</option>
+              <option value="yes">Conciliados</option>
+              <option value="no">Não conciliados</option>
             </select>
           </div>
 
@@ -1594,9 +2285,12 @@
         <table class="t-table extrato-table">
           <thead>
             <tr>
+              <th><input id="selectAllTx" class="tx-check" type="checkbox" onchange="toggleSelectAllTransactions()" title="Selecionar todos"></th>
+              <th></th>
               <th>Data</th>
               <th>Descrição</th>
               <th>Valor</th>
+              <th>Saldo</th>
               <th>Ação</th>
             </tr>
           </thead>
@@ -1608,79 +2302,108 @@
 
       <div class="table-footer">
         <span id="tableCount">Mostrando 0 movimentações</span>
-        <span>Filtros e ações disponíveis no menu da linha</span>
+        <span class="selected-total" id="selectedTxTotal">Selecionados: R$ 0,00</span>
       </div>
     </section>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal">
-  <div class="modal">
+  <div class="modal transaction-modal" id="transactionModalBox">
     <h3>Nova Transação</h3>
     <form id="txForm">
-      <div class="form-row">
-        <div>
-          <label>Tipo</label>
-          <select id="type" onchange="updateModalCategoriesByType()">
-            <option value="expense">Despesa</option>
-            <option value="income">Receita</option>
-          </select>
-        </div>
-        <div>
-          <label>Data</label>
-          <input type="date" id="date">
-        </div>
-      </div>
+      <div class="transaction-modal-layout">
+        <div class="transaction-main-fields">
+          <div class="form-row">
+            <div>
+              <label>Tipo</label>
+              <select id="type" onchange="updateModalCategoriesByType()">
+                <option value="expense">Despesa</option>
+                <option value="income">Receita</option>
+              </select>
+            </div>
+            <div>
+              <label>Data</label>
+              <input type="date" id="date" onclick="this.showPicker && this.showPicker()">
+            </div>
+          </div>
 
-      <div style="margin-bottom:16px;">
-        <label>Descrição</label>
-        <input type="text" id="description" placeholder="Ex: Aluguel, Supermercado...">
-      </div>
+          <div style="margin-bottom:16px;">
+            <label>Descrição</label>
+            <input type="text" id="description" placeholder="Ex: Aluguel, Supermercado...">
+          </div>
 
-      <div class="form-row">
-        <div>
-          <label>Valor</label>
-          <input type="number" step="0.01" id="amount" placeholder="0,00">
-        </div>
-        <div>
-          <label>Conta</label>
-          <div class="autocomplete-wrap">
-            <input id="account_search" type="text" placeholder="Buscar conta..." oninput="searchAutocomplete('account')" onfocus="searchAutocomplete('account')">
-            <input type="hidden" id="account_id">
-            <div id="account_options" class="autocomplete-list"></div>
+          <div class="form-row">
+            <div>
+              <label>Valor</label>
+              <input type="number" step="0.01" id="amount" placeholder="0,00">
+            </div>
+            <div>
+              <label>Conta</label>
+              <div class="autocomplete-wrap">
+                <input id="account_search" type="text" placeholder="Buscar conta..." oninput="searchAutocomplete('account')" onfocus="searchAutocomplete('account')">
+                <input type="hidden" id="account_id">
+                <div id="account_options" class="autocomplete-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="details-toggle-row">
+            <small>Use detalhes para categoria, centro de custo, tags, status e conciliação.</small>
+            <button type="button" class="btn btn-secondary" onclick="toggleTransactionDetails()" id="btnTxDetails">Detalhes</button>
           </div>
         </div>
-      </div>
 
-      <div class="form-row">
-        <div>
-          <label>Categoria</label>
-          <div class="autocomplete-wrap">
-            <input id="category_search" type="text" placeholder="Buscar subcategoria..." oninput="searchAutocomplete('category')" onfocus="searchAutocomplete('category')">
-            <input type="hidden" id="category_id">
-            <div id="category_options" class="autocomplete-list"></div>
+        <aside class="transaction-details-panel" id="transactionDetailsPanel">
+          <div class="details-panel-title">
+            <strong>Detalhes da transação</strong>
+            <span>Campos complementares para classificação e conciliação manual.</span>
           </div>
-        </div>
-        <div>
-          <label>Centro de Custo</label>
-          <div class="autocomplete-wrap">
-            <input id="cost_center_search" type="text" placeholder="Buscar centro..." oninput="searchAutocomplete('cost_center')" onfocus="searchAutocomplete('cost_center')">
-            <input type="hidden" id="cost_center_id">
-            <div id="cost_center_options" class="autocomplete-list"></div>
-          </div>
-        </div>
-      </div>
 
-      <div class="form-row">
-        <div>
-          <label>Tag (Opcional)</label>
-          <div class="autocomplete-wrap">
-            <input id="tag_search" type="text" placeholder="Buscar tag..." oninput="searchAutocomplete('tag')" onfocus="searchAutocomplete('tag')">
-            <input type="hidden" id="tag_id">
-            <div id="tag_options" class="autocomplete-list"></div>
+          <div class="form-row">
+            <div>
+              <label>Status</label>
+              <select id="status">
+                <option value="realized">Confirmado</option>
+                <option value="planned">Pendente</option>
+              </select>
+            </div>
+            <div>
+              <label>Conciliação</label>
+              <label class="checkbox-line"><input id="is_reconciled" type="checkbox"> Conciliado</label>
+            </div>
           </div>
-        </div>
-        <div></div>
+
+          <div class="form-row">
+            <div>
+              <label>Categoria</label>
+              <div class="autocomplete-wrap">
+                <input id="category_search" type="text" placeholder="Buscar subcategoria..." oninput="searchAutocomplete('category')" onfocus="searchAutocomplete('category')">
+                <input type="hidden" id="category_id">
+                <div id="category_options" class="autocomplete-list"></div>
+              </div>
+            </div>
+            <div>
+              <label>Centro de Custo</label>
+              <div class="autocomplete-wrap">
+                <input id="cost_center_search" type="text" placeholder="Buscar centro..." oninput="searchAutocomplete('cost_center')" onfocus="searchAutocomplete('cost_center')">
+                <input type="hidden" id="cost_center_id">
+                <div id="cost_center_options" class="autocomplete-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label>Tags (opcional)</label>
+            <div class="autocomplete-wrap">
+              <input id="tag_search" type="text" placeholder="Buscar e adicionar tags..." oninput="searchAutocomplete('tag')" onfocus="searchAutocomplete('tag')">
+              <input type="hidden" id="tag_id">
+              <input type="hidden" id="tag_ids">
+              <div id="tag_options" class="autocomplete-list"></div>
+            </div>
+            <div id="selectedTags" class="selected-tags"></div>
+          </div>
+        </aside>
       </div>
 
       <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:24px;">
@@ -1706,6 +2429,108 @@
   let accountsList = [];
   let costCentersList = [];
   let tagsList = [];
+  let selectedTagIds = [];
+  let transactionTagsMap = {};
+  let currentInitialBalance = 0;
+  let selectedTxIds = new Set();
+  const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+  window.toggleSidebar = () => {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed');
+    localStorage.setItem('finweb_sidebar_collapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
+    setTimeout(syncGridHeightWithSide, 220);
+  };
+
+  function restoreSidebarState() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const collapsed = localStorage.getItem('finweb_sidebar_collapsed') === 'true';
+    sidebar.classList.toggle('collapsed', collapsed);
+  }
+
+
+  window.toggleTransactionDetails = (force = null) => {
+    const modal = document.getElementById('transactionModalBox');
+    const btn = document.getElementById('btnTxDetails');
+    if (!modal) return;
+    const shouldOpen = force === null ? !modal.classList.contains('details-open') : Boolean(force);
+    modal.classList.toggle('details-open', shouldOpen);
+    if (btn) btn.textContent = shouldOpen ? 'Ocultar detalhes' : 'Detalhes';
+  };
+
+  function ensureYearOption(year) {
+    const ySelect = document.getElementById('filter_year');
+    if (!ySelect) return;
+    const exists = Array.from(ySelect.options).some(opt => Number(opt.value) === Number(year));
+    if (!exists) {
+      const opt = document.createElement('option');
+      opt.value = String(year);
+      opt.textContent = String(year);
+      ySelect.appendChild(opt);
+      Array.from(ySelect.options).sort((a,b) => Number(a.value) - Number(b.value)).forEach(opt => ySelect.appendChild(opt));
+    }
+  }
+
+  function updateClosedMonthLabel() {
+    const label = document.getElementById('closedMonthLabel');
+    const month = Number(document.getElementById('filter_month')?.value ?? new Date().getMonth());
+    const year = Number(document.getElementById('filter_year')?.value ?? new Date().getFullYear());
+    if (label) label.textContent = `${monthNames[month]} / ${year}`;
+  }
+
+  window.updateClosedMonthLabel = updateClosedMonthLabel;
+
+  window.changeClosedMonth = (offset) => {
+    const mSelect = document.getElementById('filter_month');
+    const ySelect = document.getElementById('filter_year');
+    if (!mSelect || !ySelect) return;
+    let month = Number(mSelect.value);
+    let year = Number(ySelect.value);
+    month += offset;
+    if (month < 0) { month = 11; year -= 1; }
+    if (month > 11) { month = 0; year += 1; }
+    ensureYearOption(year);
+    mSelect.value = String(month);
+    ySelect.value = String(year);
+    updateClosedMonthLabel();
+    loadTransactions();
+  };
+
+  function txIsConfirmed(t) { return (t.status || 'realized') === 'realized'; }
+  function txIsPending(t) { return ['planned','overdue'].includes(t.status || ''); }
+  function txIsReconciled(t) { return Boolean(t.is_reconciled ?? t.reconciled ?? t.conciliado); }
+
+  function transactionSafePayload(payload) {
+    const clean = { ...payload };
+    delete clean.is_reconciled;
+    delete clean.reconciled_at;
+    delete clean.reconciled_by;
+    return clean;
+  }
+
+  async function updateTransactionSafe(id, payload) {
+    try { return await db.update('transactions', payload, id); }
+    catch (err) {
+      const msg = String(err?.message || '').toLowerCase();
+      if (msg.includes('column') || msg.includes('schema cache') || msg.includes('is_reconciled') || msg.includes('reconciled_at')) {
+        return await db.update('transactions', transactionSafePayload(payload), id);
+      }
+      throw err;
+    }
+  }
+
+  async function insertTransactionSafe(payload) {
+    try { return await db.insert('transactions', payload); }
+    catch (err) {
+      const msg = String(err?.message || '').toLowerCase();
+      if (msg.includes('column') || msg.includes('schema cache') || msg.includes('is_reconciled') || msg.includes('reconciled_at')) {
+        return await db.insert('transactions', transactionSafePayload(payload));
+      }
+      throw err;
+    }
+  }
 
   window.logout = async () => {
     try { await logoutUser(); } catch (e) { alert("Erro ao sair: " + e.message); }
@@ -1716,14 +2541,21 @@
     document.querySelector('#modal h3').textContent = 'Nova Transação';
     document.getElementById('txForm').reset();
     clearAutocompleteFields(['account', 'category', 'cost_center', 'tag']);
+    selectedTagIds = [];
+    selectedTxIds.clear();
+    renderSelectedTags();
     document.getElementById('type').value = 'expense';
+    document.getElementById('status').value = 'realized';
+    document.getElementById('is_reconciled').checked = false;
     clearAutocompleteField('category');
     document.getElementById('date').valueAsDate = new Date();
     setDefaultMainAccount();
+    toggleTransactionDetails(false);
+    toggleTransactionDetails(true);
     document.getElementById('modal').classList.add('open');
   };
 
-  window.closeModal = () => document.getElementById('modal').classList.remove('open');
+  window.closeModal = () => { document.getElementById('modal').classList.remove('open'); toggleTransactionDetails(false); };
 
   window.editTransaction = (id) => {
     const tx = allTransactions.find(t => t.id === id);
@@ -1734,10 +2566,14 @@
     document.getElementById('amount').value = tx.amount || 0;
     document.getElementById('type').value = tx.tipo || 'expense';
     document.getElementById('date').value = tx.data || '';
+    document.getElementById('status').value = tx.status || 'realized';
+    document.getElementById('is_reconciled').checked = txIsReconciled(tx);
     setAutocompleteValue('account', tx.account_id || '', accountMap[tx.account_id] || '');
     setAutocompleteValue('category', tx.category_id || '', categoryMap[tx.category_id] || '');
     setAutocompleteValue('cost_center', tx.cost_center_id || '', getNameById(costCentersList, tx.cost_center_id));
-    setAutocompleteValue('tag', tx.tag_id || '', getNameById(tagsList, tx.tag_id));
+    selectedTagIds = getTransactionTagIds(tx);
+    setAutocompleteValue('tag', '', '');
+    renderSelectedTags();
     document.getElementById('modal').classList.add('open');
   };
 
@@ -1754,11 +2590,15 @@
   window.clearFilters = () => {
     const search = document.getElementById('filter_search');
     const type = document.getElementById('filter_type');
+    const status = document.getElementById('filter_status');
+    const reconciled = document.getElementById('filter_reconciled');
     const dateFrom = document.getElementById('filter_date_from');
     const dateTo = document.getElementById('filter_date_to');
 
     if (search) search.value = '';
     if (type) type.value = '';
+    if (status) status.value = '';
+    if (reconciled) reconciled.value = '';
     if (dateFrom) dateFrom.value = '';
     if (dateTo) dateTo.value = '';
 
@@ -1772,10 +2612,9 @@
   function setupMonthYearFilters() {
     const mSelect = document.getElementById('filter_month');
     const ySelect = document.getElementById('filter_year');
-    const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     const now = new Date();
 
-    mSelect.innerHTML = months.map((m, i) =>
+    mSelect.innerHTML = monthNames.map((m, i) =>
       `<option value="${i}" ${i === now.getMonth() ? 'selected' : ''}>${m}</option>`
     ).join('');
 
@@ -1783,6 +2622,7 @@
     ySelect.innerHTML = [currentYear - 1, currentYear, currentYear + 1].map(y =>
       `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`
     ).join('');
+    updateClosedMonthLabel();
   }
 
  async function loadOptions() {
@@ -1872,6 +2712,90 @@
     if (!id) return '';
     const item = (list || []).find(i => i.id === id);
     return item ? (item.name || item.title || '') : '';
+  }
+
+
+  function getTransactionTagIds(tx) {
+    const fromRelation = transactionTagsMap[tx.id] || [];
+    const ids = [...fromRelation];
+    if (tx.tag_id && !ids.includes(tx.tag_id)) ids.unshift(tx.tag_id);
+    if (Array.isArray(tx.tag_ids)) {
+      tx.tag_ids.forEach(id => { if (id && !ids.includes(id)) ids.push(id); });
+    }
+    return ids.filter(Boolean);
+  }
+
+  function renderSelectedTags() {
+    const wrap = document.getElementById('selectedTags');
+    const hidden = document.getElementById('tag_ids');
+    const primary = document.getElementById('tag_id');
+    if (hidden) hidden.value = selectedTagIds.join(',');
+    if (primary) primary.value = selectedTagIds[0] || '';
+    if (!wrap) return;
+
+    if (!selectedTagIds.length) {
+      wrap.innerHTML = '';
+      return;
+    }
+
+    wrap.innerHTML = selectedTagIds.map(id => {
+      const name = escapeHtml(getNameById(tagsList, id) || 'Tag');
+      return `<span class="selected-tag-pill"># ${name}<button type="button" onclick="removeSelectedTag('${id}')" title="Remover tag">×</button></span>`;
+    }).join('');
+  }
+
+  window.removeSelectedTag = (id) => {
+    selectedTagIds = selectedTagIds.filter(tagId => tagId !== id);
+    renderSelectedTags();
+  };
+
+  function addSelectedTag(id) {
+    if (!id) return;
+    if (!selectedTagIds.includes(id)) selectedTagIds.push(id);
+    setAutocompleteValue('tag', '', '');
+    renderSelectedTags();
+  }
+
+  async function loadTransactionTags(transactions) {
+    transactionTagsMap = {};
+    try {
+      const rows = await db.select('transaction_tags', { eq: { user_id: user.id } });
+      const txIds = new Set((transactions || []).map(t => t.id));
+      (rows || []).forEach(row => {
+        const txId = row.transaction_id;
+        const tagId = row.tag_id;
+        if (!txIds.has(txId) || !tagId) return;
+        if (!transactionTagsMap[txId]) transactionTagsMap[txId] = [];
+        if (!transactionTagsMap[txId].includes(tagId)) transactionTagsMap[txId].push(tagId);
+      });
+    } catch (err) {
+      // Compatibilidade: se ainda não existir tabela de vínculo, mantém o campo tag_id atual.
+      transactionTagsMap = {};
+    }
+  }
+
+  async function syncTransactionTags(transactionId, tagIds) {
+    if (!transactionId) return;
+    try {
+      const existing = await db.select('transaction_tags', {
+        eq: { user_id: user.id, transaction_id: transactionId }
+      });
+
+      for (const row of existing || []) {
+        await db.delete('transaction_tags', row.id);
+      }
+
+      for (const tagId of tagIds || []) {
+        await db.insert('transaction_tags', {
+          user_id: user.id,
+          transaction_id: transactionId,
+          tag_id: tagId,
+          created_at: new Date().toISOString()
+        });
+      }
+    } catch (err) {
+      console.warn('Não foi possível sincronizar múltiplas tags. Mantendo tag principal em transactions.tag_id.', err?.message || err);
+    }
   }
 
   function setAutocompleteValue(prefix, id, label) {
@@ -2018,6 +2942,12 @@
   };
 
   window.selectAutocomplete = (prefix, id, label) => {
+    if (prefix === 'tag') {
+      addSelectedTag(id);
+      const options = document.getElementById(`${prefix}_options`);
+      if (options) options.classList.remove('open');
+      return;
+    }
     setAutocompleteValue(prefix, id, label);
     const options = document.getElementById(`${prefix}_options`);
     if (options) options.classList.remove('open');
@@ -2051,6 +2981,8 @@
     if (!el) return;
     const parts = [];
     if (document.getElementById('filter_type')?.value) parts.push('tipo');
+    if (document.getElementById('filter_status')?.value) parts.push('status');
+    if (document.getElementById('filter_reconciled')?.value) parts.push('conciliação');
     if (document.getElementById('filter_date_from')?.value || document.getElementById('filter_date_to')?.value) parts.push('data');
     if (document.getElementById('filter_dynamic_account')?.value) parts.push('conta');
     if (document.getElementById('filter_category')?.value) parts.push('categoria');
@@ -2066,6 +2998,8 @@
     const costCenterValue = document.getElementById('filter_cost_center')?.value || '';
     const tagValue = document.getElementById('filter_tag')?.value || '';
     const typeValue = document.getElementById('filter_type')?.value || '';
+    const statusValue = document.getElementById('filter_status')?.value || '';
+    const reconciledValue = document.getElementById('filter_reconciled')?.value || '';
 
     return allTransactions.filter(t => {
       const description = (t.descricao || '').toLowerCase();
@@ -2073,17 +3007,30 @@
       const matchesSearch = !searchValue || description.includes(searchValue) || categoryName.includes(searchValue);
       const matchesCategory = !categoryValue || t.category_id === categoryValue;
       const matchesCostCenter = !costCenterValue || t.cost_center_id === costCenterValue;
-      const matchesTag = !tagValue || t.tag_id === tagValue;
+      const txTagIds = getTransactionTagIds(t);
+      const matchesTag = !tagValue || t.tag_id === tagValue || txTagIds.includes(tagValue);
       const matchesType = !typeValue || t.tipo === typeValue;
-      return matchesSearch && matchesCategory && matchesCostCenter && matchesTag && matchesType;
+      const matchesStatus = !statusValue || (statusValue === 'confirmed' ? txIsConfirmed(t) : txIsPending(t));
+      const matchesReconciled = !reconciledValue || (reconciledValue === 'yes' ? txIsReconciled(t) : !txIsReconciled(t));
+      return matchesSearch && matchesCategory && matchesCostCenter && matchesTag && matchesType && matchesStatus && matchesReconciled;
     });
   }
 
   window.applyViewFilters = () => {
     const filtered = getFilteredTransactions();
-    renderTransactions([...filtered].reverse());
+    const chronological = [...filtered].sort((a, b) => String(a.data || '').localeCompare(String(b.data || '')) || String(a.created_at || '').localeCompare(String(b.created_at || '')));
+    let runningBalance = currentInitialBalance;
+    chronological.forEach(t => {
+      const amount = Number(t.amount || 0) || 0;
+      runningBalance += t.tipo === 'income' ? amount : -amount;
+      t.running_balance = runningBalance;
+    });
+    renderTransactions(chronological);
     updateTableCount(filtered.length, allTransactions.length);
     updateActiveFiltersLabel();
+    updateSummaryCards(chronological, currentInitialBalance);
+    selectedTxIds = new Set([...selectedTxIds].filter(id => chronological.some(t => t.id === id)));
+    updateSelectedTxTotal(chronological);
   };
 
   function getCurrentMonthPeriod() {
@@ -2163,6 +3110,8 @@
         .reduce((acc, t) => t.tipo === 'income' ? acc + t.amount : acc - t.amount, 0);
 
       const saldoInicialTotal = baseSaldosIniciais + transacoesAnteriores;
+      currentInitialBalance = saldoInicialTotal;
+      await loadTransactionTags(allData);
 
       allTransactions = allData.filter(t => {
         if (!t.data) return false;
@@ -2172,7 +3121,6 @@
 
       updatePeriodLabel(month, year, accIdFiltro, { mode, startStr, endStr, dateFrom, dateTo });
       applyViewFilters();
-      updateSummaryCards(allTransactions, saldoInicialTotal);
 
     } catch (error) {
       console.error("Erro ao processar saldos com contas:", error);
@@ -2211,16 +3159,35 @@
     if (!txs.length) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="4" class="empty-state">
+          <td colspan="7" class="empty-state">
             Nenhuma movimentação encontrada para os filtros selecionados.
           </td>
         </tr>
       `;
+      updateSelectedTxTotal([]);
       syncGridHeightWithSide();
       return;
     }
 
-    tbody.innerHTML = txs.map(t => {
+    const saldoInicialPeriodo = Number(currentInitialBalance || 0) || 0;
+    const saldoAnteriorHtml = `
+      <tr class="saldo-anterior-row">
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="saldo-anterior-cell-right">
+          <div class="saldo-anterior-box">
+            <span>Saldo anterior</span>
+            <strong>${format.money(saldoInicialPeriodo)}</strong>
+          </div>
+        </td>
+        <td></td>
+      </tr>
+    `;
+
+    tbody.innerHTML = saldoAnteriorHtml + txs.map(t => {
       let dataFormatada = '---';
       if (t.data) {
         const [ano, mes, dia] = t.data.substring(0, 10).split('-');
@@ -2228,10 +3195,13 @@
       }
 
       const isIncome = t.tipo === 'income';
+      const isConfirmed = txIsConfirmed(t);
+      const isReconciled = txIsReconciled(t);
       const categoryName = categoryMap[t.category_id] || 'Sem categoria';
       const accountName = accountMap[t.account_id] || 'Sem conta';
       const costCenterName = getNameById(costCentersList, t.cost_center_id) || 'Sem centro de custo';
-      const tagName = getNameById(tagsList, t.tag_id);
+      const tagNames = getTransactionTagIds(t).map(id => getNameById(tagsList, id)).filter(Boolean);
+      const tagName = tagNames.join(', ');
       const amountLabel = `${isIncome ? '+' : '-'} ${format.money(t.amount || 0)}`;
 
       const metaParts = [
@@ -2243,7 +3213,9 @@
 
       return `
         <tr>
-          <td>${dataFormatada}</td>
+          <td><input class="tx-check" type="checkbox" ${selectedTxIds.has(t.id) ? 'checked' : ''} onchange="toggleTxSelection('${t.id}')" onclick="event.stopPropagation()"></td>
+          <td><span class="status-dot ${isConfirmed ? 'confirmed' : 'pending'}" title="${isConfirmed ? 'Confirmado' : 'Pendente'}"></span>${isReconciled ? '<span class="reconciled-icon" title="Conciliado">✓</span>' : ''}</td>
+          <td><span class="tx-date">${dataFormatada}</span></td>
           <td>
             <div class="tx-description">
               <div class="tx-description-main" title="${escapeHtml(t.descricao || '')}">${escapeHtml(t.descricao || '---')}</div>
@@ -2255,18 +3227,69 @@
           <td class="${isIncome ? 'val-income' : 'val-expense'} tx-value">
             ${amountLabel}
           </td>
+          <td><span class="tx-balance" style="color:${(Number(t.running_balance || 0) >= 0) ? 'var(--green)' : 'var(--danger)'}">${format.money(t.running_balance || 0)}</span></td>
           <td>
             <button class="more-action-btn" onclick="toggleTxMenu(event, '${t.id}')" title="Mais ações">...</button>
             <div class="tx-action-menu" id="tx-menu-${t.id}">
               <button type="button" onclick="closeTxMenus(); editTransaction('${t.id}')">Alterar</button>
+              <button type="button" onclick="closeTxMenus(); reconcileTransaction('${t.id}')">Conciliar</button>
               <button type="button" class="danger" onclick="closeTxMenus(); deleteTx('${t.id}')">Excluir</button>
             </div>
           </td>
         </tr>
       `;
     }).join('');
+    updateSelectedTxTotal(txs);
     syncGridHeightWithSide();
   }
+
+  function updateSelectedTxTotal(baseList = getFilteredTransactions()) {
+    const selected = baseList.filter(t => selectedTxIds.has(t.id));
+    const total = selected.reduce((sum, t) => sum + (t.tipo === 'income' ? Number(t.amount || 0) : -Number(t.amount || 0)), 0);
+    const el = document.getElementById('selectedTxTotal');
+    if (el) {
+      el.textContent = selected.length ? `Selecionados: ${selected.length} • ${format.money(total)}` : 'Selecionados: R$ 0,00';
+      el.style.color = total >= 0 ? 'var(--green)' : 'var(--danger)';
+    }
+    const selectAll = document.getElementById('selectAllTx');
+    if (selectAll) {
+      selectAll.checked = baseList.length > 0 && baseList.every(t => selectedTxIds.has(t.id));
+      selectAll.indeterminate = baseList.some(t => selectedTxIds.has(t.id)) && !selectAll.checked;
+    }
+  }
+
+  window.toggleTxSelection = (id) => {
+    if (selectedTxIds.has(id)) selectedTxIds.delete(id);
+    else selectedTxIds.add(id);
+    updateSelectedTxTotal(getFilteredTransactions());
+  };
+
+  window.toggleSelectAllTransactions = () => {
+    const list = getFilteredTransactions();
+    const checked = document.getElementById('selectAllTx')?.checked;
+    list.forEach(t => { if (checked) selectedTxIds.add(t.id); else selectedTxIds.delete(t.id); });
+    renderTransactions(list);
+  };
+
+  window.reconcileTransaction = async (id) => {
+    try {
+      await updateTransactionSafe(id, { is_reconciled: true, reconciled_at: new Date().toISOString(), reconciled_by: user.id, updated_at: new Date().toISOString() });
+      await loadTransactions();
+    } catch (err) { alert('Erro ao conciliar: ' + err.message); }
+  };
+
+  window.reconcileSelectedTransactions = async () => {
+    const targets = [...selectedTxIds];
+    if (!targets.length) return alert('Selecione ao menos um lançamento para conciliar.');
+    if (!confirm(`Deseja conciliar ${targets.length} lançamento(s) selecionado(s)?`)) return;
+    try {
+      for (const id of targets) {
+        await updateTransactionSafe(id, { is_reconciled: true, reconciled_at: new Date().toISOString(), reconciled_by: user.id, updated_at: new Date().toISOString() });
+      }
+      selectedTxIds.clear();
+      await loadTransactions();
+    } catch (err) { alert('Erro ao conciliar em lote: ' + err.message); }
+  };
 
   window.closeTxMenus = () => {
     document.querySelectorAll('.tx-action-menu.open').forEach(menu => menu.classList.remove('open'));
@@ -2284,11 +3307,15 @@
   document.addEventListener('click', () => closeTxMenus());
 
   function updateSummaryCards(txs, initialBalance = 0) {
-    let inc = 0, exp = 0;
+    let inc = 0, exp = 0, reconciled = 0, unreconciled = 0;
 
     txs.forEach(t => {
+      const signed = t.tipo === 'income' ? Number(t.amount || 0) : -Number(t.amount || 0);
       if (t.tipo === 'income') inc += (t.amount || 0);
       else exp += (t.amount || 0);
+
+      if (txIsReconciled(t)) reconciled += signed;
+      else unreconciled += signed;
     });
 
     const finalBalance = initialBalance + inc - exp;
@@ -2297,9 +3324,12 @@
     document.getElementById('summary_incomes').textContent = format.money(inc);
     document.getElementById('summary_expenses').textContent = format.money(exp);
     document.getElementById('summary_final').textContent = format.money(finalBalance);
+    document.getElementById('summary_reconciled').textContent = format.money(reconciled);
+    document.getElementById('summary_unreconciled').textContent = format.money(unreconciled);
 
     const finalEl = document.getElementById('summary_final');
     finalEl.style.color = finalBalance >= 0 ? 'var(--green)' : 'var(--danger)';
+    document.getElementById('summary_unreconciled').style.color = unreconciled >= 0 ? 'var(--warning)' : 'var(--danger)';
   }
 
   window.saveTransaction = async (e) => {
@@ -2313,12 +3343,23 @@
       account_id: document.getElementById('account_id').value,
       category_id: document.getElementById('category_id').value || null,
       cost_center_id: document.getElementById('cost_center_id').value || null,
-      tag_id: document.getElementById('tag_id').value || null,
+      tag_id: selectedTagIds[0] || null,
+      status: document.getElementById('status').value || 'realized',
+      is_reconciled: document.getElementById('is_reconciled').checked,
+      reconciled_at: document.getElementById('is_reconciled').checked ? new Date().toISOString() : null,
+      reconciled_by: document.getElementById('is_reconciled').checked ? user.id : null,
       updated_at: new Date().toISOString()
     };
     try {
-      if (editingId) await db.update('transactions', data, editingId);
-      else await db.insert('transactions', data);
+      let savedTransaction = null;
+      if (editingId) {
+        await updateTransactionSafe(editingId, data);
+        await syncTransactionTags(editingId, selectedTagIds);
+      } else {
+        savedTransaction = await insertTransactionSafe(data);
+        const newId = savedTransaction?.id || savedTransaction?.[0]?.id;
+        if (newId) await syncTransactionTags(newId, selectedTagIds);
+      }
       closeModal();
       await loadTransactions();
     } catch (err) { alert("Erro ao salvar: " + err.message); }
@@ -2345,11 +3386,13 @@
   window.addEventListener('resize', syncGridHeightWithSide);
 
 (async () => {
+  restoreSidebarState();
   initSupabase();
   user = await getCurrentUser();
   if (!user) return window.location.href = 'login.html';
 
   setupMonthYearFilters();
+  updateClosedMonthLabel();
   
   // 1º: Carrega as opções e define a conta principal nos selects
   await loadOptions();

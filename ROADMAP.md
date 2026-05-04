@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Plano de desenvolvimento em 10 fases para completar o sistema financeiro completo.
+Plano de evolução do FinWeb para um sistema financeiro pessoal completo, com controle de contas, transações, categorias, centros de custo, tags, cartões, contas a pagar/receber, fluxo de caixa, dashboard e relatórios.
 
 ---
 
@@ -10,231 +10,254 @@ Plano de desenvolvimento em 10 fases para completar o sistema financeiro complet
 
 **Status:** COMPLETO
 
-### Banco de Dados
-- ✅ Schema com 11 tabelas
+- ✅ Schema inicial do sistema
 - ✅ Row Level Security (RLS)
 - ✅ Triggers de auditoria
 - ✅ Índices de performance
 - ✅ Views úteis
-
-### Frontend Base
+- ✅ Integração com Supabase
 - ✅ Estrutura HTML/CSS/JS
-- ✅ Página de login
-- ✅ Dashboard básico
-- ✅ Cliente Supabase
+- ✅ Layout base do sistema
+- ✅ Sidebar de navegação padronizada
+- ✅ Padrão visual dark/green
 
 ---
 
-## FASE 2: Autenticação & Contas 🔄
+## FASE 2: Autenticação & Segurança ✅
 
-**Status:** Completo
+**Status:** COMPLETO
 
-### Autenticação
 - ✅ Login com email/senha
 - ✅ Cadastro de usuário
-- ✅ Recuperação de senha
 - ✅ Sessão persistente
-
-### Gestão de Contas
-- ✅ CRUD de contas
-- ✅ Listar contas
-- ✅ Editar saldo inicial
-- ✅ Deletar contas
+- ✅ Logout
+- ✅ Recuperação de senha via Supabase
+- ✅ Tela de redefinição de senha
+- ✅ Uso de RLS no Supabase
+- ✅ Fluxo separado para login, cadastro e reset de senha
 
 ---
 
-## FASE 3: Categorias & Tags
+## FASE 3: Cadastros Base ✅
 
-**Status:** Completo
+**Status:** COMPLETO
 
-### Categorias
-- ✅ CRUD de categorias
-- ✅ Categorias pai/filho (hierarquia)
-- ✅ Editar cores
-- ✅ Ativar/desativar
+### Contas
+- ✅ CRUD de contas
+- ✅ Saldo inicial e saldo atual
+- ✅ Conta principal/padrão
+- ✅ Tipos ajustados: Caixa, Corrente e Investimento
+- ✅ Filtros por descrição, tipo e status
+- ✅ Inativação de conta
+- ✅ Grid com saldo atual
+- ✅ Cards laterais com saldos por tipo
+- ✅ Layout padronizado com menu retrátil
+
+### Categorias e Subcategorias
+- ✅ CRUD de categorias e subcategorias
+- ✅ Ativação/inativação
+- ✅ Filtros por descrição, tipo e status
+- ✅ Validação de integridade para categoria com subcategorias
+- ✅ Transferência de lançamentos entre subcategorias
+- ✅ Layout padronizado
+
+### Centros de Custo
+- ✅ CRUD de centros de custo
+- ✅ Filtro por descrição e status
+- ✅ Integridade para inativação/exclusão vinculada a lançamentos
+- ✅ Layout padronizado
 
 ### Tags
 - ✅ CRUD de tags
-- ⬜ Associar tags a transações
-- ⬜ Filtrar por tags
-
-### Centro de custos
-- ✅ CRUD de Centro de custos
-- ⬜ Associar centro de custos a transações
-- ⬜ Filtrar por centros de custos
----
-
-## FASE 4: Transações Básicas
-
-**Status:** PLANEJADO
-
-### CRUD de Transações
-- ⬜ Criar transação
-- ⬜ Listar transações
-- ⬜ Editar transação
-- ⬜ Deletar transação
-
-### Filtros & Busca
-- ⬜ Filtrar por data
-- ⬜ Filtrar por categoria
-- ⬜ Filtrar por account
-- ⬜ Busca por descrição
-
-### Views
-- ⬜ Listar tudo
-- ⬜ Apenas receitas
-- ⬜ Apenas despesas
-- ⬜ Não pagas
+- ✅ Filtro por descrição e status
+- ✅ Layout padronizado
+- ✅ Menu de ações sem ícones
 
 ---
 
-## FASE 5: Cartões de Crédito
+## FASE 4: Transações & Extrato ✅
+
+**Status:** COMPLETO / EM EVOLUÇÃO CONTROLADA
+
+### Funcionalidades concluídas
+- ✅ Criar, listar, editar e excluir transações
+- ✅ Vincular conta, categoria/subcategoria, centro de custo e tags
+- ✅ Suporte a múltiplas tags por lançamento via `transaction_tags`
+- ✅ Filtro padrão por mês corrente e conta principal
+- ✅ Navegação mensal com setas no card lateral
+- ✅ Filtros por tipo, período, conta, categoria, centro de custo, tag e descrição
+- ✅ Botão limpar filtros retornando ao padrão
+- ✅ Grid estilo extrato com saldo anterior e saldo por linha
+- ✅ Menu de ações por linha com botão `...`
+- ✅ Indicadores visuais de status: confirmado/pendente
+- ✅ Filtro por status confirmado/pendente
+- ✅ Preparação visual e lógica para conciliação manual
+- ✅ Filtro por conciliado/não conciliado
+- ✅ Seleção de lançamentos por checkbox
+- ✅ Totalizador dos lançamentos selecionados no rodapé
+- ✅ Botão para conciliar lançamentos em lote
+- ✅ Resumo do período com saldo conciliado e saldo sem conciliação
+- ✅ Modal com painel de detalhes expansível, seguindo o padrão de Pagar/Receber
+- ✅ Ajustes na grid para linhas compactas e sem scroll horizontal
+
+### Banco de dados / arquitetura
+- ✅ `transactions.status` definido como status oficial
+- ✅ Status oficiais: `realized`, `planned`, `overdue`, `cancelled`
+- ✅ Script preparado para campos de conciliação: `is_reconciled`, `reconciled_at`, `reconciled_by`
+- ✅ Compatibilidade no frontend caso as colunas de conciliação ainda não existam
+
+---
+
+## FASE 5: Contas a Pagar e Contas a Receber ✅
+
+**Status:** PRIMEIRA VERSÃO IMPLEMENTADA
+
+### Funcionalidades concluídas
+- ✅ Tela `payables_receivables.html`
+- ✅ Menu lateral com item único “Pagar/Receber”
+- ✅ Menu retrátil no padrão do sistema
+- ✅ Card “Mês fechado” com navegação por setas
+- ✅ Abertura padrão em Contas a Pagar
+- ✅ Card de resumo do período
+- ✅ Saldo previsto calculado por período
+- ✅ Filtros por período, status, conta e descrição
+- ✅ Grid de compromissos financeiros
+- ✅ Retorno padrão apenas de títulos pendentes
+- ✅ Modal de inclusão seguindo padrão visual do sistema
+- ✅ Modal com detalhes expansíveis
+- ✅ Data de inclusão com padrão do dia atual
+- ✅ Calendário nos campos de data
+- ✅ Tags no lançamento
+- ✅ Recorrência e parcelamento
+- ✅ Periodicidade semanal, quinzenal, mensal e anual
+- ✅ Parcelamento por valor total e quantidade de parcelas
+- ✅ Modal de baixa com possibilidade de alterar conta de baixa
+- ✅ Baixa individual via menu de ações
+- ✅ Baixa em lote por seleção
+- ✅ Alteração em lote de detalhes para títulos pendentes
+- ✅ Integridade para alterar/excluir parcela selecionada ou pendentes do grupo
+
+### Próximos refinamentos
+- ⬜ Melhorar validações de campos obrigatórios
+- ⬜ Criar alertas de vencimento
+- ⬜ Baixa parcial
+- ⬜ Relatório específico de pagar/receber
+- ⬜ Integração mais forte com fluxo de caixa previsto
+
+---
+
+## FASE 6: Fluxo de Caixa Previsto x Realizado 🟡
+
+**Status:** PRÓXIMA PRIORIDADE
+
+- ⬜ Consolidar transações realizadas
+- ⬜ Consolidar compromissos previstos
+- ⬜ Projetar saldo futuro por conta
+- ⬜ Separar visão previsto x realizado
+- ⬜ Destacar risco de saldo negativo
+- ⬜ Filtros por conta, período, categoria e centro de custo
+- ⬜ Gráfico mensal de evolução
+- ⬜ Visão de fluxo diário/semanal/mensal
+
+---
+
+## FASE 7: Cartões de Crédito 🔜
 
 **Status:** PLANEJADO
 
-### Gestão de Cartões
 - ⬜ CRUD de cartões
-- ⬜ Definir limite de crédito
-- ⬜ Definir datas de fechamento
-- ⬜ Vincular conta
-
-### Faturas
+- ⬜ Limite de crédito
+- ⬜ Fechamento e vencimento
+- ⬜ Vincular cartão a conta de pagamento
 - ⬜ Gerar faturas automáticas
-- ⬜ Listar faturas abertas
-- ⬜ Marcar como paga
-- ⬜ Ver detalhes da fatura
-
-### Transações de Cartão
-- ⬜ Lançar no cartão
-- ⬜ Visualizar gastos do mês
-- ⬜ Alocar a faturas
+- ⬜ Lançar compra no cartão
+- ⬜ Parcelamento de compras
+- ⬜ Alocar compras na fatura correta
+- ⬜ Pagamento de fatura gerando transação
 
 ---
 
-## FASE 6: Dashboard Avançado
+## FASE 8: Dashboard Avançado 🔜
 
 **Status:** PLANEJADO
 
-### Widgets
-- ⬜ Saldo total
-- ⬜ Receita vs Despesa (mês)
-- ⬜ Gastos por categoria (pie chart)
-- ⬜ Timeline de transações
+- ⬜ Saldo total consolidado
+- ⬜ Receita vs despesa do mês
+- ⬜ Gastos por categoria
+- ⬜ Gastos por conta
+- ⬜ Contas a pagar próximas
+- ⬜ Contas a receber próximas
 - ⬜ Cartões em aberto
-- ⬜ Próximos pagamentos
-
-### Gráficos
-- ⬜ Chart.js ou similar
-- ⬜ Atualização em tempo real
-- ⬜ Exportar gráficos
+- ⬜ Fluxo previsto vs realizado
+- ⬜ Gráficos por categoria e evolução mensal
 
 ---
 
-## FASE 7: Fluxo de Caixa
+## FASE 9: Relatórios Detalhados 🔜
 
 **Status:** PLANEJADO
 
-### Previsão
-- ⬜ Adicionar receitas/despesas previstas
-- ⬜ Definir frequência (mensal, anual)
-- ⬜ Visualizar previsão por mês
-- ⬜ Comparar real vs previsto
-
-### Análise
-- ⬜ Identificar padrões
-- ⬜ Alertas de fluxo negativo
-- ⬜ Recomendações de economias
-
----
-
-## FASE 8: Relatórios Detalhados
-
-**Status:** PLANEJADO
-
-### Relatórios Disponíveis
 - ⬜ Resumo mensal
 - ⬜ Gastos por categoria
 - ⬜ Receitas por origem
-- ⬜ Transações recorrentes
-- ⬜ Análise de cartão de crédito
+- ⬜ Transações por conta
+- ⬜ Transações por centro de custo
+- ⬜ Transações por tag
+- ⬜ Contas a pagar
+- ⬜ Contas a receber
 - ⬜ Fluxo de caixa anual
-
-### Exportação
-- ⬜ PDF
-- ⬜ CSV/Excel
-- ⬜ Impressão
+- ⬜ Exportação PDF, CSV/Excel e impressão
 
 ---
 
-## FASE 9: Transações Recorrentes
+## FASE 10: Deploy & Otimização 🔜
 
 **Status:** PLANEJADO
 
-### Funcionalidades
-- ⬜ Criar recorrências
-- ⬜ Automação de lançamentos
-- ⬜ Editar/pausar recorrências
-- ⬜ Histórico de execuções
-- ⬜ Alertas de próximas transações
-
----
-
-## FASE 10: Deploy & Otimização
-
-**Status:** PLANEJADO
-
-### Deploy
-- ⬜ Vercel ou Netlify
+- ⬜ Deploy em Vercel ou Netlify
 - ⬜ Domínio customizado
 - ⬜ HTTPS
-- ⬜ CDN
-
-### Otimização
-- ⬜ Performance (Lighthouse 90+)
-- ⬜ Mobile responsivo (100%)
-- ⬜ PWA (Progressive Web App)
-- ⬜ Offline mode
-- ⬜ Service Workers
-
-### Segurança
-- ⬜ Audit de segurança
-- ⬜ Testes de penetração
-- ⬜ OWASP compliance
-- ⬜ Rate limiting
+- ⬜ Configuração de URLs do Supabase em produção
+- ⬜ Performance Lighthouse 90+
+- ⬜ Mobile responsivo
+- ⬜ PWA
+- ⬜ Revisão das policies RLS
 
 ---
 
-## Timeline Estimada
+## Progresso Geral
 
+```text
+FASE 1:  ████████████████████ 100% ✅ Fundação Estrutural
+FASE 2:  ████████████████████ 100% ✅ Autenticação & Segurança
+FASE 3:  ████████████████████ 100% ✅ Cadastros Base
+FASE 4:  ████████████████████ 100% ✅ Transações & Extrato
+FASE 5:  ████████████████░░░░  80% ✅ Pagar/Receber v1
+FASE 6:  ████░░░░░░░░░░░░░░░░  20% 🟡 Fluxo de Caixa
+FASE 7:  ░░░░░░░░░░░░░░░░░░░░   0% 🔜 Cartões
+FASE 8:  ░░░░░░░░░░░░░░░░░░░░   0% 🔜 Dashboard Avançado
+FASE 9:  ░░░░░░░░░░░░░░░░░░░░   0% 🔜 Relatórios
+FASE 10: ░░░░░░░░░░░░░░░░░░░░   0% 🔜 Deploy & Otimização
 ```
-FASE 1: ████████████████████ (COMPLETO)
-FASE 2: ████░░░░░░░░░░░░░░░░ (20%)
-FASE 3: ░░░░░░░░░░░░░░░░░░░░ (0%)
-FASE 4: ░░░░░░░░░░░░░░░░░░░░ (0%)
-FASE 5: ░░░░░░░░░░░░░░░░░░░░ (0%)
-FASE 6: ░░░░░░░░░░░░░░░░░░░░ (0%)
-FASE 7: ░░░░░░░░░░░░░░░░░░░░ (0%)
-FASE 8: ░░░░░░░░░░░░░░░░░░░░ (0%)
-FASE 9: ░░░░░░░░░░░░░░░░░░░░ (0%)
-FASE 10: ░░░░░░░░░░░░░░░░░░░░ (0%)
-```
 
-**Semanas por Fase:**
-- FASE 1: 1 semana ✅
-- FASE 2: 1 semana 🔄
-- FASE 3: 3-5 dias
-- FASE 4: 1 semana
-- FASE 5: 1 semana
-- FASE 6: 1 semana
-- FASE 7: 1 semana
-- FASE 8: 5-7 dias
-- FASE 9: 5-7 dias
-- FASE 10: 1-2 semanas
+---
 
-**Total Estimado:** 10-12 semanas para MVP completo
+## Próxima Prioridade Recomendada
+
+### 1. Fluxo de Caixa Previsto x Realizado
+Agora que transações, saldos, conciliação e Pagar/Receber estão estruturados, o próximo passo natural é consolidar tudo em uma visão de fluxo futuro por conta e por período.
+
+### 2. Refinamento de Pagar/Receber
+Finalizar alertas, baixa parcial, relatórios e ajustes finos de validação.
+
+### 3. Cartões de Crédito
+Após o fluxo previsto estar consistente, cartões entram como nova origem de compromissos futuros.
 
 ---
 
 ## Últimas Atualizações
 
-- 2026-04-27: Roadmap criado
+- 2026-04-27: Roadmap inicial criado.
+- 2026-05-02: Atualizado progresso das fases concluídas e inclusão de Contas a Pagar e Contas a Receber.
+- 2026-05-03: Padronização da tabela `transactions`: `status` como coluna oficial.
+- 2026-05-04: Implementado padrão visual consolidado dos cadastros, evolução de Pagar/Receber, múltiplas tags, grid de extrato com saldo por linha e preparação de conciliação manual.
