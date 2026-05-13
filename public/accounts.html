@@ -41,12 +41,11 @@
       height: 100vh;
       position: sticky;
       top: 0;
-      background: rgba(15, 23, 42, 0.92);
+      background: var(--card);
       border-right: 1px solid var(--border);
       padding: 20px 14px;
       display: flex;
       flex-direction: column;
-      backdrop-filter: blur(12px);
       transition: width .2s ease, padding .2s ease;
       overflow-x: hidden;
     }
@@ -66,9 +65,8 @@
 
     .logo {
       font-size: 20px;
-      font-weight: 700;
+      font-weight: 600;
       padding: 0 8px;
-      letter-spacing: -0.04em;
       white-space: nowrap;
       overflow: hidden;
     }
@@ -98,13 +96,14 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 12px;
-      margin-bottom: 4px;
-      border-radius: 10px;
+      padding: 9px 11px;
+      margin-bottom: 3px;
+      border-radius: 8px;
       text-decoration: none;
       color: var(--muted);
-      font-size: 14px;
-      transition: all 0.18s ease;
+      font-size: 13px;
+      line-height: 1.15;
+      transition: all 0.15s;
       cursor: pointer;
       white-space: nowrap;
     }
@@ -115,7 +114,7 @@
     .sidebar.collapsed .menu a { justify-content: center; padding: 10px; gap: 0; }
     .sidebar.collapsed .menu-divider { margin: 10px 8px; }
     .menu a:hover, .menu a.active {
-      background: rgba(34,197,94,0.12);
+      background: rgba(34,197,94,0.1);
       color: var(--green);
     }
     .menu a.danger:hover {
@@ -124,12 +123,12 @@
     }
 
     .menu-label {
-      font-size: 10px;
+      font-size: 9.5px;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--muted);
-      padding: 12px 12px 6px;
-      font-weight: 700;
+      padding: 11px 11px 5px;
+      font-weight: 600;
       opacity: 0.7;
       display: block;
     }
@@ -137,7 +136,7 @@
     .menu-divider {
       border: 0;
       border-top: 1px solid var(--border);
-      margin: 10px 12px;
+      margin: 9px 10px;
       opacity: 0.5;
     }
 
@@ -372,9 +371,9 @@
     .badge-checking { background: rgba(6,182,212,0.13); color: var(--cyan); }
     .badge-savings { background: rgba(34,197,94,0.13); color: var(--green); }
     .badge-investment { background: rgba(139,92,246,0.13); color: var(--purple); }
-    .badge-active { background: rgba(34,197,94,0.12); color: var(--green); }
+    .badge-active { background: rgba(34,197,94,0.1); color: var(--green); }
     .badge-inactive { background: rgba(239,68,68,0.12); color: var(--danger); }
-    .badge-main { background: rgba(34,197,94,0.12); color: var(--green); }
+    .badge-main { background: rgba(34,197,94,0.1); color: var(--green); }
 
     .action-menu-btn {
       width: 34px;
@@ -541,24 +540,34 @@
 
   <nav class="menu">
     <div class="menu-label">Movimentações</div>
-    <a href="/public/dashboard.html" id="link-dash" title="Dashboard">📊 <span class="menu-text">Dashboard</span></a>
-    <a href="/public/transactions.html" id="link-tx" title="Transações">💸 <span class="menu-text">Transações</span></a>
-    <a href="/public/payables_receivables.html?type=expense" title="Pagar/Receber">📅 <span class="menu-text">Pagar/Receber</span></a>
+    <a href="/public/dashboard.html" title="Dashboard">📊 <span class="menu-text">Dashboard</span></a>
+    <a href="/public/transactions.html" title="Transações">💸 <span class="menu-text">Transações</span></a>
+    <a href="/public/payables_receivables.html?type=income" title="Pagar/Receber">📅 <span class="menu-text">Pagar/Receber</span></a>
     <a href="/public/cards.html" title="Cartões">💳 <span class="menu-text">Cartões</span></a>
+    <a href="/public/imports.html" title="Importação">📥 <span class="menu-text">Importação</span></a>
+    
+    <hr class="menu-divider">
 
+    <div class="menu-label">Metas</div>
+    <a href="/public/goals.html" title="Cadastro de Metas">🎯 <span class="menu-text">Cadastro de Metas</span></a>
+    <a href="/public/budgets.html" title="Orçamento">🧾 <span class="menu-text">Orçamento</span></a>
+    
     <hr class="menu-divider">
 
     <div class="menu-label">Demonstrativos</div>
     <a href="/public/reports.html" title="Relatórios">📈 <span class="menu-text">Relatórios</span></a>
-    <a href="#" title="Fluxo de Caixa">🌊 <span class="menu-text">Fluxo de Caixa</span></a>
-
+    <a href="/public/cash_flow.html" title="Fluxo de Caixa">💹 <span class="menu-text">Fluxo de Caixa</span></a>
+    <a href="/public/budget_vs_actual.html" title="Orçado X Realizado">📊 <span class="menu-text">Orçado X Realizado</span></a>
+    <a href="/public/goals_evolution.html" title="Evolução de Metas">📉 <span class="menu-text">Evolução de Metas</span></a>
+    
     <hr class="menu-divider">
 
     <div class="menu-label">Cadastro</div>
     <a href="/public/accounts.html" class="active" title="Contas">🏦 <span class="menu-text">Contas</span></a>
+    <a href="/public/credit_cards.html" title="Cartão de Crédito">💳 <span class="menu-text">Cartão de Crédito</span></a>
     <a href="/public/categories.html" title="Categorias">🏷️ <span class="menu-text">Categorias</span></a>
     <a href="/public/cost_centers.html" title="Centro de Custos">🏢 <span class="menu-text">Centro de Custos</span></a>
-    <a href="/public/Tags.html" title="Tags">🏷️ <span class="menu-text">Tags</span></a>
+    <a href="/public/Tags.html" title="Tags">🔖 <span class="menu-text">Tags</span></a>
 
     <hr class="menu-divider">
     <a onclick="logout()" class="danger" style="cursor:pointer" title="Sair">🚪 <span class="menu-text">Sair</span></a>
